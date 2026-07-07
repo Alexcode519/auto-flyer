@@ -240,6 +240,37 @@ const SLOT_TO_PREVIEW = {
   g4: { img: "p-g4-img" }
 };
 
+// ---------- Image repositioning (object-position within each frame) ----------
+const IMAGE_STEP = 12; // percent nudged per click
+const imagePosition = {
+  hero: { x: 50, y: 50 }, g1: { x: 50, y: 50 }, g2: { x: 50, y: 50 },
+  g3: { x: 50, y: 50 }, g4: { x: 50, y: 50 }
+};
+
+function applyImagePosition(slot) {
+  const pos = imagePosition[slot];
+  const objectPosition = `${pos.x}% ${pos.y}%`;
+  const pImg = $(SLOT_TO_PREVIEW[slot].img);
+  if (pImg) pImg.style.objectPosition = objectPosition;
+  const slotEl = $(`upload-${slot}`).closest(".photo-slot");
+  const thumb = slotEl.querySelector(".slot-preview");
+  if (thumb) thumb.style.objectPosition = objectPosition;
+}
+
+document.querySelectorAll(".reposition-pad button").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const pad = btn.closest(".reposition-pad");
+    const slot = pad.dataset.target;
+    const pos = imagePosition[slot];
+    const dir = btn.dataset.dir;
+    if (dir === "up") pos.y = Math.max(0, pos.y - IMAGE_STEP);
+    if (dir === "down") pos.y = Math.min(100, pos.y + IMAGE_STEP);
+    if (dir === "left") pos.x = Math.max(0, pos.x - IMAGE_STEP);
+    if (dir === "right") pos.x = Math.min(100, pos.x + IMAGE_STEP);
+    applyImagePosition(slot);
+  });
+});
+
 Object.keys(SLOT_TO_PREVIEW).forEach((slot) => {
   const input = $(`upload-${slot}`);
   input.addEventListener("change", () => {
@@ -264,6 +295,12 @@ Object.keys(SLOT_TO_PREVIEW).forEach((slot) => {
       pImg.src = dataUrl;
       pImg.hidden = false;
       if (target.empty) $(target.empty).hidden = true;
+
+      // reset and reveal this slot's reposition controls for the new image
+      imagePosition[slot] = { x: 50, y: 50 };
+      applyImagePosition(slot);
+      const pad = document.querySelector(`.reposition-pad[data-target="${slot}"]`);
+      if (pad) pad.hidden = false;
 
       if (slot === "hero") {
         const tmpImg = new Image();
@@ -349,7 +386,12 @@ document.querySelectorAll("[data-feature-title], [data-feature-sub]").forEach((i
 // ---------- Export to PNG ----------
 $("export-btn").addEventListener("click", () => {
   const node = $("pamphlet");
-  html2canvas(node, { scale: 2, backgroundColor: "#1c1c1e", useCORS: true }).then((canvas) => {
+  html2canvas(node, {
+    scale: 2,
+    backgroundColor: "#1c1c1e",
+    useCORS: true,
+    ignoreElements: (el) => el.classList.contains("reposition-pad")
+  }).then((canvas) => {
     const link = document.createElement("a");
     const brand = (state.brand || "vehicle").replace(/\s+/g, "-");
     const model = (state.model || "pamphlet").replace(/\s+/g, "-");
