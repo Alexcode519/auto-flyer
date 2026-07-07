@@ -234,10 +234,10 @@ variantCustom.addEventListener("input", () => {
 // ---------- Photo uploads ----------
 const SLOT_TO_PREVIEW = {
   hero: { img: "p-hero-img", empty: "p-hero-empty" },
-  g1: { img: "p-g1-img" },
-  g2: { img: "p-g2-img" },
-  g3: { img: "p-g3-img" },
-  g4: { img: "p-g4-img" }
+  g1: { img: "p-g1-img", empty: "p-g1-empty" },
+  g2: { img: "p-g2-img", empty: "p-g2-empty" },
+  g3: { img: "p-g3-img", empty: "p-g3-empty" },
+  g4: { img: "p-g4-img", empty: "p-g4-empty" }
 };
 
 // ---------- Image repositioning (object-position within each frame) ----------
