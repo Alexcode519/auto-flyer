@@ -14,7 +14,16 @@
     <h1>AutoFlyer</h1>
 
     <section class="field-group">
-      <h2>1. Photos</h2>
+      <h2>1. Branch</h2>
+      <label class="field">
+        <span>Dealership branch</span>
+        <select id="branch-select"></select>
+      </label>
+      <p class="hint">Selecting a branch fills in the dealer info below — you can still edit it per-flyer.</p>
+    </section>
+
+    <section class="field-group">
+      <h2>2. Photos</h2>
       <div class="photo-slots">
         <div class="photo-slot hero" data-slot="hero">
           <input type="file" accept="image/*" id="upload-hero" />
@@ -58,7 +67,7 @@
     </section>
 
     <section class="field-group">
-      <h2>2. Vehicle</h2>
+      <h2>3. Vehicle</h2>
 
       <label class="field">
         <span>Brand</span>
@@ -120,7 +129,7 @@
     </section>
 
     <section class="field-group">
-      <h2>3. Copy</h2>
+      <h2>4. Copy</h2>
       <label class="field">
         <span>Headline line 1</span>
         <input type="text" id="tagline1-input" value="BUILT TO WORK." />
@@ -143,7 +152,7 @@
     </section>
 
     <section class="field-group">
-      <h2>4. Dealer info</h2>
+      <h2>5. Dealer info</h2>
       <label class="field">
         <span>Dealer name</span>
         <input type="text" id="dealer-name-input" value="AVURA Executive Auto" />
@@ -260,6 +269,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="vehicleData.js"></script>
+<script src="branchData.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

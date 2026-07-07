@@ -65,6 +65,29 @@ function detectColorFromImage(imgEl, callback) {
 // ---------- Element refs ----------
 const $ = (id) => document.getElementById(id);
 
+// ---------- Branch selector ----------
+const branchSelect = $("branch-select");
+BRANCH_DATA.forEach((branch, i) => {
+  const opt = document.createElement("option");
+  opt.value = i;
+  opt.textContent = branch.name;
+  branchSelect.appendChild(opt);
+});
+
+function applyBranch(index) {
+  const branch = BRANCH_DATA[index];
+  if (!branch) return;
+  $("dealer-name-input").value = branch.name;
+  $("dealer-address-input").value = branch.address;
+  $("dealer-phone-input").value = branch.phone;
+  $("dealer-web-input").value = branch.website;
+}
+
+branchSelect.addEventListener("change", () => {
+  applyBranch(Number(branchSelect.value));
+  syncPreview();
+});
+
 const state = {
   brand: "", model: "", variant: "",
   images: {}
@@ -312,4 +335,5 @@ $("export-btn").addEventListener("click", () => {
 
 // initial defaults
 $("year-input").value = "2021";
+applyBranch(0);
 syncPreview();
