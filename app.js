@@ -448,6 +448,22 @@ document.querySelectorAll("[data-feature-title], [data-feature-sub]").forEach((i
   input.addEventListener("input", syncPreview);
 });
 
+// ---------- Feature icon picker ----------
+const DEFAULT_FEATURE_ICONS = ["engine", "4x4", "shield", "payload"];
+document.querySelectorAll(".icon-select").forEach((select) => {
+  const idx = select.dataset.featureIcon;
+  Object.keys(ICON_LIBRARY).forEach((key) => {
+    const opt = document.createElement("option");
+    opt.value = key;
+    opt.textContent = ICON_LIBRARY[key].label;
+    select.appendChild(opt);
+  });
+  select.value = DEFAULT_FEATURE_ICONS[idx];
+  select.addEventListener("change", () => {
+    $(`p-feature-${idx}-icon`).innerHTML = ICON_LIBRARY[select.value].svg;
+  });
+});
+
 // ---------- Export to PNG ----------
 $("export-btn").addEventListener("click", () => {
   const node = $("pamphlet");
