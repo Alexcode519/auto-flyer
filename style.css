@@ -76,18 +76,32 @@ body {
   gap: 10px;
 }
 
-.checklist-fields {
+.subheading {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #555;
+  margin: 14px 0 6px;
+}
+
+.checklist-fields,
+.feature-fields {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-top: 8px;
 }
-.checklist-fields input {
+.checklist-fields input,
+.feature-fields input {
   padding: 7px 10px;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 13px;
+  width: 100%;
 }
+.feature-fields .row-2 { gap: 6px; }
 
 .hint {
   font-size: 12px;

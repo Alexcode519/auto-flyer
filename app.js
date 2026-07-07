@@ -317,6 +317,13 @@ function syncPreview() {
     $(`p-check-${input.dataset.check}`).textContent = input.value;
   });
 
+  document.querySelectorAll("[data-feature-title]").forEach((input) => {
+    $(`p-feature-${input.dataset.featureTitle}-title`).textContent = input.value;
+  });
+  document.querySelectorAll("[data-feature-sub]").forEach((input) => {
+    $(`p-feature-${input.dataset.featureSub}-sub`).textContent = input.value;
+  });
+
   $("p-dealer-name-main").textContent = ($("dealer-name-input").value.split(" ")[0] || "AVURA").toUpperCase();
   $("p-dealer-name-sub").textContent = $("dealer-name-input").value.split(" ").slice(1).join(" ") || "Executive Auto";
   $("p-footer-dealer").textContent = $("p-dealer-name-main").textContent;
@@ -332,6 +339,10 @@ function syncPreview() {
 ].forEach((id) => $(id).addEventListener("input", syncPreview));
 
 document.querySelectorAll("[data-check]").forEach((input) => {
+  input.addEventListener("input", syncPreview);
+});
+
+document.querySelectorAll("[data-feature-title], [data-feature-sub]").forEach((input) => {
   input.addEventListener("input", syncPreview);
 });
 
