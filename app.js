@@ -240,39 +240,102 @@ const SLOT_TO_PREVIEW = {
   g4: { img: "p-g4-img", empty: "p-g4-empty" }
 };
 
-// ---------- Image repositioning (object-position within each frame) ----------
-const IMAGE_STEP = 12; // percent nudged per click
+// ---------- Image repositioning + zoom (crop editor modal) ----------
+const IMAGE_STEP = 8; // percent nudged per click
+const HERO_ASPECT = "700 / 260";
+const GALLERY_ASPECT = "1 / 1";
 const imagePosition = {
-  hero: { x: 50, y: 50 }, g1: { x: 50, y: 50 }, g2: { x: 50, y: 50 },
-  g3: { x: 50, y: 50 }, g4: { x: 50, y: 50 }
+  hero: { x: 50, y: 50, scale: 1 }, g1: { x: 50, y: 50, scale: 1 }, g2: { x: 50, y: 50, scale: 1 },
+  g3: { x: 50, y: 50, scale: 1 }, g4: { x: 50, y: 50, scale: 1 }
 };
+let cropModalSlot = null;
 
 function applyImagePosition(slot) {
   const pos = imagePosition[slot];
   const objectPosition = `${pos.x}% ${pos.y}%`;
+  const transform = `scale(${pos.scale})`;
   const pImg = $(SLOT_TO_PREVIEW[slot].img);
-  if (pImg) pImg.style.objectPosition = objectPosition;
+  if (pImg) {
+    pImg.style.objectPosition = objectPosition;
+    pImg.style.transform = transform;
+  }
   const slotEl = $(`upload-${slot}`).closest(".photo-slot");
   const thumb = slotEl.querySelector(".slot-preview");
-  if (thumb) thumb.style.objectPosition = objectPosition;
+  if (thumb) {
+    thumb.style.objectPosition = objectPosition;
+    thumb.style.transform = transform;
+  }
+  if (cropModalSlot === slot) {
+    const modalImg = $("crop-modal-img");
+    modalImg.style.objectPosition = objectPosition;
+    modalImg.style.transform = transform;
+  }
 }
 
-document.querySelectorAll(".reposition-pad button").forEach((btn) => {
+function nudge(slot, dir) {
+  const pos = imagePosition[slot];
+  // Arrows nudge the photo itself (drag-the-image metaphor), not the crop
+  // viewport -- clicking up moves the image up, revealing more of what's
+  // below it, same convention as Facebook/LinkedIn cover photo repositioning.
+  if (dir === "up") pos.y = Math.min(100, pos.y + IMAGE_STEP);
+  if (dir === "down") pos.y = Math.max(0, pos.y - IMAGE_STEP);
+  if (dir === "left") pos.x = Math.min(100, pos.x + IMAGE_STEP);
+  if (dir === "right") pos.x = Math.max(0, pos.x - IMAGE_STEP);
+  applyImagePosition(slot);
+}
+
+// ---------- Crop modal ----------
+const cropModal = $("crop-modal");
+const cropModalImg = $("crop-modal-img");
+const cropModalFrame = $("crop-modal-frame");
+const cropZoomSlider = $("crop-zoom-slider");
+
+function openCropModal(slot) {
+  cropModalSlot = slot;
+  cropModalImg.src = state.images[slot] || "";
+  cropModalFrame.style.aspectRatio = slot === "hero" ? HERO_ASPECT : GALLERY_ASPECT;
+  cropZoomSlider.value = imagePosition[slot].scale;
+  applyImagePosition(slot);
+  cropModal.hidden = false;
+}
+
+function closeCropModal() {
+  cropModal.hidden = true;
+  cropModalSlot = null;
+}
+
+document.querySelectorAll(".crop-btn").forEach((btn) => {
+  btn.addEventListener("click", () => openCropModal(btn.dataset.target));
+});
+
+$("crop-done-btn").addEventListener("click", closeCropModal);
+cropModal.addEventListener("click", (e) => {
+  if (e.target === cropModal) closeCropModal();
+});
+
+$("crop-reset-btn").addEventListener("click", () => {
+  if (!cropModalSlot) return;
+  imagePosition[cropModalSlot] = { x: 50, y: 50, scale: 1 };
+  cropZoomSlider.value = 1;
+  applyImagePosition(cropModalSlot);
+});
+
+document.querySelectorAll(".crop-pad button").forEach((btn) => {
   btn.addEventListener("click", () => {
-    const pad = btn.closest(".reposition-pad");
-    const slot = pad.dataset.target;
-    const pos = imagePosition[slot];
-    const dir = btn.dataset.dir;
-    // Arrows nudge the photo itself (drag-the-image metaphor), not the crop
-    // viewport -- clicking up moves the image up, revealing more of what's
-    // below it, same convention as Facebook/LinkedIn cover photo repositioning.
-    if (dir === "up") pos.y = Math.min(100, pos.y + IMAGE_STEP);
-    if (dir === "down") pos.y = Math.max(0, pos.y - IMAGE_STEP);
-    if (dir === "left") pos.x = Math.min(100, pos.x + IMAGE_STEP);
-    if (dir === "right") pos.x = Math.max(0, pos.x - IMAGE_STEP);
-    applyImagePosition(slot);
+    if (cropModalSlot) nudge(cropModalSlot, btn.dataset.dir);
   });
 });
+
+function setZoom(value) {
+  if (!cropModalSlot) return;
+  imagePosition[cropModalSlot].scale = Math.min(3, Math.max(1, value));
+  cropZoomSlider.value = imagePosition[cropModalSlot].scale;
+  applyImagePosition(cropModalSlot);
+}
+
+cropZoomSlider.addEventListener("input", () => setZoom(Number(cropZoomSlider.value)));
+$("crop-zoom-in").addEventListener("click", () => setZoom(Number(cropZoomSlider.value) + 0.2));
+$("crop-zoom-out").addEventListener("click", () => setZoom(Number(cropZoomSlider.value) - 0.2));
 
 Object.keys(SLOT_TO_PREVIEW).forEach((slot) => {
   const input = $(`upload-${slot}`);
@@ -299,11 +362,11 @@ Object.keys(SLOT_TO_PREVIEW).forEach((slot) => {
       pImg.hidden = false;
       if (target.empty) $(target.empty).hidden = true;
 
-      // reset and reveal this slot's reposition controls for the new image
-      imagePosition[slot] = { x: 50, y: 50 };
+      // reset and reveal this slot's crop control for the new image
+      imagePosition[slot] = { x: 50, y: 50, scale: 1 };
       applyImagePosition(slot);
-      const pad = document.querySelector(`.reposition-pad[data-target="${slot}"]`);
-      if (pad) pad.hidden = false;
+      const cropBtn = document.querySelector(`.crop-btn[data-target="${slot}"]`);
+      if (cropBtn) cropBtn.hidden = false;
 
       if (slot === "hero") {
         const tmpImg = new Image();
@@ -393,7 +456,7 @@ $("export-btn").addEventListener("click", () => {
     scale: 2,
     backgroundColor: "#1c1c1e",
     useCORS: true,
-    ignoreElements: (el) => el.classList.contains("reposition-pad")
+    ignoreElements: (el) => el.classList.contains("crop-btn")
   }).then((canvas) => {
     const link = document.createElement("a");
     const brand = (state.brand || "vehicle").replace(/\s+/g, "-");
