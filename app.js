@@ -67,36 +67,51 @@ const $ = (id) => document.getElementById(id);
 
 // ---------- Branch selector ----------
 const branchSelect = $("branch-select");
+let currentBranchIndex = 0;
+const RENAME_OPTION = "__rename__";
+
 BRANCH_DATA.forEach((branch, i) => {
   const opt = document.createElement("option");
   opt.value = i;
   opt.textContent = branch.name;
   branchSelect.appendChild(opt);
 });
+const renameSeparator = document.createElement("option");
+renameSeparator.disabled = true;
+renameSeparator.textContent = "──────────";
+branchSelect.appendChild(renameSeparator);
+const renameOption = document.createElement("option");
+renameOption.value = RENAME_OPTION;
+renameOption.textContent = "✎ Rename current branch…";
+branchSelect.appendChild(renameOption);
 
 function applyBranch(index) {
   const branch = BRANCH_DATA[index];
   if (!branch) return;
-  $("branch-rename-input").value = branch.name;
   $("dealer-name-input").value = branch.name;
   $("dealer-address-input").value = branch.address;
   $("dealer-phone-input").value = branch.phone;
   $("dealer-web-input").value = branch.website;
 }
 
+// The "Rename current branch" entry is folded into the dropdown itself
+// (rather than a separate field) to save space; picking it prompts for a
+// new name, updates that branch's label and dealer-name default in place,
+// then restores the dropdown to the branch that was just renamed.
 branchSelect.addEventListener("change", () => {
-  applyBranch(Number(branchSelect.value));
-  syncPreview();
-});
-
-// Renaming a branch here updates its dropdown label and its dealer-name
-// default for future switches, so it doesn't need re-typing every time.
-$("branch-rename-input").addEventListener("input", () => {
-  const idx = Number(branchSelect.value);
-  const name = $("branch-rename-input").value;
-  BRANCH_DATA[idx].name = name;
-  branchSelect.options[idx].textContent = name;
-  $("dealer-name-input").value = name;
+  if (branchSelect.value === RENAME_OPTION) {
+    const newName = prompt("Rename this branch:", BRANCH_DATA[currentBranchIndex].name);
+    branchSelect.value = String(currentBranchIndex);
+    if (newName && newName.trim()) {
+      BRANCH_DATA[currentBranchIndex].name = newName.trim();
+      branchSelect.options[currentBranchIndex].textContent = newName.trim();
+      $("dealer-name-input").value = newName.trim();
+      syncPreview();
+    }
+    return;
+  }
+  currentBranchIndex = Number(branchSelect.value);
+  applyBranch(currentBranchIndex);
   syncPreview();
 });
 
