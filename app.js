@@ -248,8 +248,7 @@ function syncPreview() {
   $("p-details-brand").textContent = `${brand} ${model}`.toUpperCase();
   $("p-details-variant").textContent = variant;
 
-  const year = $("year-input").value ? new Date($("year-input").value).getFullYear() : "";
-  $("p-year").textContent = year || "—";
+  $("p-year").textContent = $("year-input").value || "—";
 
   const km = $("km-input").value;
   $("p-km").textContent = km ? `${formatThousands(km)} Km` : "—";
@@ -299,6 +298,18 @@ $("export-btn").addEventListener("click", () => {
   });
 });
 
+// ---------- Year dropdown ----------
+(function populateYears() {
+  const select = $("year-input");
+  const currentYear = new Date().getFullYear();
+  for (let y = currentYear + 1; y >= 1990; y--) {
+    const opt = document.createElement("option");
+    opt.value = y;
+    opt.textContent = y;
+    select.appendChild(opt);
+  }
+})();
+
 // initial defaults
-$("year-input").value = "2021-01-01";
+$("year-input").value = "2021";
 syncPreview();
