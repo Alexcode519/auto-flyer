@@ -250,6 +250,9 @@ const imagePosition = {
 };
 let cropModalSlot = null;
 
+// Only the flyer image and the modal's own preview reflect crop adjustments;
+// the small sidebar thumbnail under "2. Photos" intentionally stays as the
+// plain uploaded photo so it remains a stable reference thumbnail.
 function applyImagePosition(slot) {
   const pos = imagePosition[slot];
   const objectPosition = `${pos.x}% ${pos.y}%`;
@@ -258,12 +261,6 @@ function applyImagePosition(slot) {
   if (pImg) {
     pImg.style.objectPosition = objectPosition;
     pImg.style.transform = transform;
-  }
-  const slotEl = $(`upload-${slot}`).closest(".photo-slot");
-  const thumb = slotEl.querySelector(".slot-preview");
-  if (thumb) {
-    thumb.style.objectPosition = objectPosition;
-    thumb.style.transform = transform;
   }
   if (cropModalSlot === slot) {
     const modalImg = $("crop-modal-img");
