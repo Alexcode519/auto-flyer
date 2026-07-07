@@ -1,0 +1,304 @@
+// ---------- Named colour palette for nearest-match detection ----------
+const COLOR_PALETTE = [
+  { name: "White", rgb: [245, 245, 245] },
+  { name: "Black", rgb: [20, 20, 20] },
+  { name: "Silver", rgb: [190, 190, 192] },
+  { name: "Grey", rgb: [120, 120, 122] },
+  { name: "Beige", rgb: [222, 202, 158] },
+  { name: "Red", rgb: [178, 34, 34] },
+  { name: "Blue", rgb: [40, 70, 140] },
+  { name: "Green", rgb: [45, 90, 60] },
+  { name: "Brown", rgb: [92, 64, 42] },
+  { name: "Gold", rgb: [190, 160, 80] },
+  { name: "Orange", rgb: [205, 105, 30] },
+  { name: "Yellow", rgb: [210, 180, 40] }
+];
+
+function nearestColorName(r, g, b) {
+  let best = null, bestDist = Infinity;
+  for (const c of COLOR_PALETTE) {
+    const d = (r - c.rgb[0]) ** 2 + (g - c.rgb[1]) ** 2 + (b - c.rgb[2]) ** 2;
+    if (d < bestDist) { bestDist = d; best = c.name; }
+  }
+  return best;
+}
+
+// Classifies every sampled pixel to its nearest palette bucket and returns the
+// mode bucket, rather than averaging RGB first. A plain average gets dragged
+// toward whatever fills the most background area (sky, gravel, rock); voting
+// per-pixel is robust to that since the vehicle body still wins the vote as
+// long as it's a sizeable chunk of the frame, wherever it's positioned.
+// Always best-effort -- the colour dropdown stays user-overridable.
+function detectColorFromImage(imgEl, callback) {
+  const canvas = document.createElement("canvas");
+  const w = (canvas.width = 120);
+  const h = (canvas.height = 120);
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(imgEl, 0, 0, w, h);
+  let data;
+  try {
+    data = ctx.getImageData(0, 0, w, h).data;
+  } catch (e) {
+    return; // CORS-tainted canvas, skip silently
+  }
+  const votes = {};
+  // skip the top 15% (usually sky/ceiling) and bottom 10% (usually ground/shadow)
+  const y0 = h * 0.15, y1 = h * 0.9;
+  for (let y = y0; y < y1; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (Math.floor(y) * w + Math.floor(x)) * 4;
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      const lightness = (max + min) / 2;
+      if (lightness < 15 || lightness > 250) continue; // skip pure shadow/blown highlight
+      if (b - r > 15 && b - g > 8) continue; // skip sky's characteristic blue cast
+      const name = nearestColorName(r, g, b);
+      votes[name] = (votes[name] || 0) + 1;
+    }
+  }
+  const names = Object.keys(votes);
+  if (!names.length) return;
+  const winner = names.reduce((a, b) => (votes[a] >= votes[b] ? a : b));
+  callback(winner);
+}
+
+// ---------- Element refs ----------
+const $ = (id) => document.getElementById(id);
+
+const state = {
+  brand: "", model: "", variant: "",
+  images: {}
+};
+
+// ---------- Brand autocomplete ----------
+const brandInput = $("brand-input");
+const brandSuggestions = $("brand-suggestions");
+const modelSelect = $("model-select");
+const modelCustom = $("model-custom");
+const variantSelect = $("variant-select");
+const variantCustom = $("variant-custom");
+
+const brandNames = Object.keys(VEHICLE_DATA);
+
+brandInput.addEventListener("input", () => {
+  const q = brandInput.value.trim().toLowerCase();
+  state.brand = brandInput.value.trim();
+  resetSelect(modelSelect, "Select a brand first", true);
+  resetSelect(variantSelect, "Select a model first", true);
+  modelCustom.hidden = true;
+  variantCustom.hidden = true;
+
+  if (!q) { brandSuggestions.hidden = true; syncPreview(); return; }
+  const matches = brandNames.filter((b) => b.toLowerCase().includes(q));
+  if (!matches.length) { brandSuggestions.hidden = true; syncPreview(); return; }
+  brandSuggestions.innerHTML = "";
+  matches.forEach((b) => {
+    const div = document.createElement("div");
+    div.textContent = b;
+    div.addEventListener("click", () => {
+      brandInput.value = b;
+      state.brand = b;
+      brandSuggestions.hidden = true;
+      populateModels(b);
+      syncPreview();
+    });
+    brandSuggestions.appendChild(div);
+  });
+  brandSuggestions.hidden = false;
+  syncPreview();
+});
+
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".autocomplete")) brandSuggestions.hidden = true;
+});
+
+function resetSelect(select, placeholder, disabled) {
+  select.innerHTML = `<option value="">${placeholder}</option>`;
+  select.disabled = disabled;
+}
+
+function populateModels(brand) {
+  const models = VEHICLE_DATA[brand];
+  resetSelect(modelSelect, "Select model", false);
+  if (models) {
+    Object.keys(models).forEach((m) => {
+      const opt = document.createElement("option");
+      opt.value = m; opt.textContent = m;
+      modelSelect.appendChild(opt);
+    });
+  }
+  const otherOpt = document.createElement("option");
+  otherOpt.value = "__other__"; otherOpt.textContent = "Other (type manually)";
+  modelSelect.appendChild(otherOpt);
+}
+
+modelSelect.addEventListener("change", () => {
+  modelCustom.hidden = modelSelect.value !== "__other__";
+  if (modelSelect.value === "__other__") {
+    state.model = "";
+    modelCustom.value = "";
+    modelCustom.focus();
+    resetSelect(variantSelect, "Select a model first", true);
+  } else {
+    state.model = modelSelect.value;
+    populateVariants(state.brand, state.model);
+  }
+  syncPreview();
+});
+
+modelCustom.addEventListener("input", () => {
+  state.model = modelCustom.value.trim();
+  syncPreview();
+});
+
+function populateVariants(brand, model) {
+  const variants = (VEHICLE_DATA[brand] && VEHICLE_DATA[brand][model]) || [];
+  resetSelect(variantSelect, "Select variant", false);
+  variants.forEach((v) => {
+    const opt = document.createElement("option");
+    opt.value = v; opt.textContent = v;
+    variantSelect.appendChild(opt);
+  });
+  const otherOpt = document.createElement("option");
+  otherOpt.value = "__other__"; otherOpt.textContent = "Other (type manually)";
+  variantSelect.appendChild(otherOpt);
+}
+
+variantSelect.addEventListener("change", () => {
+  variantCustom.hidden = variantSelect.value !== "__other__";
+  if (variantSelect.value === "__other__") {
+    state.variant = "";
+    variantCustom.value = "";
+    variantCustom.focus();
+  } else {
+    state.variant = variantSelect.value;
+  }
+  syncPreview();
+});
+
+variantCustom.addEventListener("input", () => {
+  state.variant = variantCustom.value.trim();
+  syncPreview();
+});
+
+// ---------- Photo uploads ----------
+const SLOT_TO_PREVIEW = {
+  hero: { img: "p-hero-img", empty: "p-hero-empty" },
+  g1: { img: "p-g1-img" },
+  g2: { img: "p-g2-img" },
+  g3: { img: "p-g3-img" },
+  g4: { img: "p-g4-img" }
+};
+
+Object.keys(SLOT_TO_PREVIEW).forEach((slot) => {
+  const input = $(`upload-${slot}`);
+  input.addEventListener("change", () => {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      state.images[slot] = dataUrl;
+
+      // update form thumbnail
+      const slotEl = input.closest(".photo-slot");
+      const placeholder = slotEl.querySelector(".slot-placeholder");
+      const preview = slotEl.querySelector(".slot-preview");
+      preview.src = dataUrl;
+      preview.hidden = false;
+      placeholder.hidden = true;
+
+      // update pamphlet preview
+      const target = SLOT_TO_PREVIEW[slot];
+      const pImg = $(target.img);
+      pImg.src = dataUrl;
+      pImg.hidden = false;
+      if (target.empty) $(target.empty).hidden = true;
+
+      if (slot === "hero") {
+        const tmpImg = new Image();
+        tmpImg.onload = () => {
+          detectColorFromImage(tmpImg, (colorName) => {
+            $("color-select").value = colorName;
+            syncPreview();
+          });
+        };
+        tmpImg.src = dataUrl;
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+// ---------- Number / text formatting ----------
+function formatThousands(n) {
+  return Number(n || 0).toLocaleString("en-ZA");
+}
+
+// ---------- Live preview sync ----------
+function syncPreview() {
+  const brand = state.brand || "TOYOTA";
+  const model = state.model || "LAND CRUISER";
+  const variant = state.variant || "";
+
+  $("p-badge-brand").textContent = brand.toUpperCase();
+  $("p-badge-model").textContent = model.toUpperCase();
+  $("p-badge-variant").textContent = variant ? variant.split(" ").slice(0, 2).join(" ").toUpperCase() : "";
+
+  $("p-details-brand").textContent = `${brand} ${model}`.toUpperCase();
+  $("p-details-variant").textContent = variant;
+
+  const year = $("year-input").value ? new Date($("year-input").value).getFullYear() : "";
+  $("p-year").textContent = year || "—";
+
+  const km = $("km-input").value;
+  $("p-km").textContent = km ? `${formatThousands(km)} Km` : "—";
+
+  const color = $("color-select").value;
+  $("p-color").textContent = color;
+
+  const price = $("price-input").value;
+  $("p-price").textContent = price ? `R${formatThousands(price)}` : "R—";
+
+  $("p-tagline1").textContent = $("tagline1-input").value;
+  $("p-tagline2").textContent = $("tagline2-input").value;
+  $("p-description").textContent = $("description-input").value;
+
+  document.querySelectorAll("[data-check]").forEach((input) => {
+    $(`p-check-${input.dataset.check}`).textContent = input.value;
+  });
+
+  $("p-dealer-name-main").textContent = ($("dealer-name-input").value.split(" ")[0] || "AVURA").toUpperCase();
+  $("p-dealer-name-sub").textContent = $("dealer-name-input").value.split(" ").slice(1).join(" ") || "Executive Auto";
+  $("p-footer-dealer").textContent = $("p-dealer-name-main").textContent;
+  $("p-dealer-address").textContent = $("dealer-address-input").value;
+  $("p-dealer-phone").textContent = $("dealer-phone-input").value;
+  $("p-dealer-web").textContent = $("dealer-web-input").value;
+}
+
+[
+  "year-input", "km-input", "price-input", "color-select",
+  "tagline1-input", "tagline2-input", "description-input",
+  "dealer-name-input", "dealer-address-input", "dealer-phone-input", "dealer-web-input"
+].forEach((id) => $(id).addEventListener("input", syncPreview));
+
+document.querySelectorAll("[data-check]").forEach((input) => {
+  input.addEventListener("input", syncPreview);
+});
+
+// ---------- Export to PNG ----------
+$("export-btn").addEventListener("click", () => {
+  const node = $("pamphlet");
+  html2canvas(node, { scale: 2, backgroundColor: "#1c1c1e", useCORS: true }).then((canvas) => {
+    const link = document.createElement("a");
+    const brand = (state.brand || "vehicle").replace(/\s+/g, "-");
+    const model = (state.model || "pamphlet").replace(/\s+/g, "-");
+    link.download = `${brand}-${model}-pamphlet.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+});
+
+// initial defaults
+$("year-input").value = "2021-01-01";
+syncPreview();

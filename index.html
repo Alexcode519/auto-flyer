@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AutoFlyer</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ FORM PANEL ============ -->
+  <aside class="form-panel">
+    <h1>AutoFlyer</h1>
+
+    <section class="field-group">
+      <h2>1. Photos</h2>
+      <div class="photo-slots">
+        <div class="photo-slot hero" data-slot="hero">
+          <input type="file" accept="image/*" id="upload-hero" />
+          <label for="upload-hero" class="slot-label">
+            <span class="slot-placeholder">+ Hero photo (side profile)</span>
+            <img class="slot-preview" hidden />
+          </label>
+        </div>
+        <div class="gallery-slots">
+          <div class="photo-slot" data-slot="g1">
+            <input type="file" accept="image/*" id="upload-g1" />
+            <label for="upload-g1" class="slot-label">
+              <span class="slot-placeholder">+ Interior</span>
+              <img class="slot-preview" hidden />
+            </label>
+          </div>
+          <div class="photo-slot" data-slot="g2">
+            <input type="file" accept="image/*" id="upload-g2" />
+            <label for="upload-g2" class="slot-label">
+              <span class="slot-placeholder">+ Rear 3/4</span>
+              <img class="slot-preview" hidden />
+            </label>
+          </div>
+          <div class="photo-slot" data-slot="g3">
+            <input type="file" accept="image/*" id="upload-g3" />
+            <label for="upload-g3" class="slot-label">
+              <span class="slot-placeholder">+ Front</span>
+              <img class="slot-preview" hidden />
+            </label>
+          </div>
+          <div class="photo-slot" data-slot="g4">
+            <input type="file" accept="image/*" id="upload-g4" />
+            <label for="upload-g4" class="slot-label">
+              <span class="slot-placeholder">+ Load bed</span>
+              <img class="slot-preview" hidden />
+            </label>
+          </div>
+        </div>
+      </div>
+      <p class="hint">Colour is auto-detected from the hero photo &mdash; override it below if needed.</p>
+    </section>
+
+    <section class="field-group">
+      <h2>2. Vehicle</h2>
+
+      <label class="field">
+        <span>Brand</span>
+        <div class="autocomplete">
+          <input type="text" id="brand-input" placeholder="Start typing e.g. Toyota" autocomplete="off" />
+          <div class="suggestions" id="brand-suggestions" hidden></div>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Model</span>
+        <select id="model-select" disabled>
+          <option value="">Select a brand first</option>
+        </select>
+      </label>
+      <input type="text" class="field-custom" id="model-custom" placeholder="Type model" hidden />
+
+      <label class="field">
+        <span>Variant / Type</span>
+        <select id="variant-select" disabled>
+          <option value="">Select a model first</option>
+        </select>
+      </label>
+      <input type="text" class="field-custom" id="variant-custom" placeholder="Type variant" hidden />
+
+      <label class="field">
+        <span>Colour</span>
+        <select id="color-select">
+          <option value="Beige">Beige</option>
+          <option value="White">White</option>
+          <option value="Black">Black</option>
+          <option value="Silver">Silver</option>
+          <option value="Grey">Grey</option>
+          <option value="Red">Red</option>
+          <option value="Blue">Blue</option>
+          <option value="Green">Green</option>
+          <option value="Brown">Brown</option>
+          <option value="Gold">Gold</option>
+          <option value="Orange">Orange</option>
+          <option value="Yellow">Yellow</option>
+        </select>
+      </label>
+
+      <div class="row-2">
+        <label class="field">
+          <span>Model year</span>
+          <input type="date" id="year-input" />
+        </label>
+        <label class="field">
+          <span>Kilometres</span>
+          <input type="number" id="km-input" placeholder="e.g. 175000" min="0" />
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Price (ZAR)</span>
+        <input type="number" id="price-input" placeholder="e.g. 729900" min="0" />
+      </label>
+    </section>
+
+    <section class="field-group">
+      <h2>3. Copy</h2>
+      <label class="field">
+        <span>Headline line 1</span>
+        <input type="text" id="tagline1-input" value="BUILT TO WORK." />
+      </label>
+      <label class="field">
+        <span>Headline line 2 (accent)</span>
+        <input type="text" id="tagline2-input" value="MADE TO LAST." />
+      </label>
+      <label class="field">
+        <span>Description</span>
+        <textarea id="description-input" rows="2">Legendary reliability. Unmatched capability.</textarea>
+      </label>
+
+      <div class="checklist-fields">
+        <input type="text" value="Full Service History" data-check="0" />
+        <input type="text" value="Well Maintained" data-check="1" />
+        <input type="text" value="Ready for Work or Adventure" data-check="2" />
+        <input type="text" value="Finance Available" data-check="3" />
+      </div>
+    </section>
+
+    <section class="field-group">
+      <h2>4. Dealer info</h2>
+      <label class="field">
+        <span>Dealer name</span>
+        <input type="text" id="dealer-name-input" value="AVURA Executive Auto" />
+      </label>
+      <label class="field">
+        <span>Address</span>
+        <input type="text" id="dealer-address-input" value="36 Kock Street, Rustenburg, 0299" />
+      </label>
+      <div class="row-2">
+        <label class="field">
+          <span>Phone</span>
+          <input type="text" id="dealer-phone-input" value="014 592 0334" />
+        </label>
+        <label class="field">
+          <span>Website</span>
+          <input type="text" id="dealer-web-input" value="www.avuramotors.co.za" />
+        </label>
+      </div>
+    </section>
+
+    <button id="export-btn" class="export-btn">Download PNG</button>
+  </aside>
+
+  <!-- ============ PREVIEW / PAMPHLET ============ -->
+  <main class="preview-panel">
+    <div class="pamphlet-scale-wrap">
+      <div id="pamphlet" class="pamphlet">
+
+        <header class="p-header">
+          <div class="p-logo">
+            <span class="logo-main" id="p-dealer-name-main">AVURA</span>
+            <span class="logo-sub" id="p-dealer-name-sub">Executive Auto</span>
+          </div>
+        </header>
+
+        <section class="p-hero">
+          <div class="p-hero-text">
+            <h2 class="p-tagline1" id="p-tagline1">BUILT TO WORK.</h2>
+            <h2 class="p-tagline2" id="p-tagline2">MADE TO LAST.</h2>
+            <p class="p-description" id="p-description">Legendary reliability. Unmatched capability.</p>
+          </div>
+          <div class="p-badge">
+            <span class="badge-brand" id="p-badge-brand">TOYOTA</span>
+            <span class="badge-model" id="p-badge-model">LAND CRUISER</span>
+            <span class="badge-variant" id="p-badge-variant">79 SERIES</span>
+          </div>
+          <div class="p-hero-photo">
+            <img id="p-hero-img" hidden />
+            <span class="photo-empty" id="p-hero-empty">Hero photo</span>
+          </div>
+        </section>
+
+        <section class="p-features">
+          <div class="feature">
+            <svg viewBox="0 0 48 48"><path d="M6 30h6v-8h8v-4h4l4-4h8v4h4l4 4v8h2M14 22V14h10v4M22 30h6" stroke="var(--gold)" stroke-width="2" fill="none"/><circle cx="14" cy="34" r="3" stroke="var(--gold)" stroke-width="2" fill="none"/><circle cx="34" cy="34" r="3" stroke="var(--gold)" stroke-width="2" fill="none"/></svg>
+            <span class="f-title">4.5L V8 TURBO DIESEL</span>
+            <span class="f-sub">Powerful. Proven.</span>
+          </div>
+          <div class="feature">
+            <svg viewBox="0 0 48 48"><circle cx="12" cy="14" r="4" stroke="var(--gold)" stroke-width="2" fill="none"/><circle cx="36" cy="14" r="4" stroke="var(--gold)" stroke-width="2" fill="none"/><circle cx="12" cy="34" r="4" stroke="var(--gold)" stroke-width="2" fill="none"/><circle cx="36" cy="34" r="4" stroke="var(--gold)" stroke-width="2" fill="none"/><path d="M16 14h16M12 18v12M36 18v12M16 34h16" stroke="var(--gold)" stroke-width="2" fill="none"/></svg>
+            <span class="f-title">4X4 CAPABILITY</span>
+            <span class="f-sub">Go anywhere.</span>
+          </div>
+          <div class="feature">
+            <svg viewBox="0 0 48 48"><path d="M24 6l16 6v10c0 10-7 17-16 20-9-3-16-10-16-20V12z" stroke="var(--gold)" stroke-width="2" fill="none"/><path d="M17 24l5 5 9-10" stroke="var(--gold)" stroke-width="2" fill="none"/></svg>
+            <span class="f-title">TOYOTA RELIABILITY</span>
+            <span class="f-sub">Built to go the distance.</span>
+          </div>
+          <div class="feature">
+            <svg viewBox="0 0 48 48"><rect x="4" y="16" width="24" height="12" stroke="var(--gold)" stroke-width="2" fill="none"/><path d="M28 20h8l6 6v2h-14z" stroke="var(--gold)" stroke-width="2" fill="none"/><circle cx="12" cy="30" r="3" stroke="var(--gold)" stroke-width="2" fill="none"/><circle cx="34" cy="30" r="3" stroke="var(--gold)" stroke-width="2" fill="none"/></svg>
+            <span class="f-title">HEAVY DUTY PAYLOAD</span>
+            <span class="f-sub">Work smarter. Work harder.</span>
+          </div>
+        </section>
+
+        <section class="p-gallery">
+          <div class="gallery-cell"><img id="p-g1-img" hidden /><span class="photo-empty">Interior</span></div>
+          <div class="gallery-cell"><img id="p-g2-img" hidden /><span class="photo-empty">Rear 3/4</span></div>
+          <div class="gallery-cell"><img id="p-g3-img" hidden /><span class="photo-empty">Front</span></div>
+          <div class="gallery-cell"><img id="p-g4-img" hidden /><span class="photo-empty">Load bed</span></div>
+        </section>
+
+        <section class="p-details">
+          <div class="p-details-left">
+            <span class="p-brand-line" id="p-details-brand">TOYOTA LAND CRUISER</span>
+            <span class="p-variant-line" id="p-details-variant">4.5D LX V8 P/U S/C</span>
+            <div class="p-meta-row">
+              <span class="meta-item">📅 <span id="p-year">2021</span></span>
+              <span class="meta-item">📏 <span id="p-km">175 000 Km</span></span>
+              <span class="meta-item">🎨 <span id="p-color">Beige</span></span>
+            </div>
+            <span class="p-price-label">PRICE:</span>
+            <span class="p-price" id="p-price">R729 900</span>
+          </div>
+          <div class="p-details-right">
+            <div class="check-item"><span class="check-mark">✓</span><span id="p-check-0">Full Service History</span></div>
+            <div class="check-item"><span class="check-mark">✓</span><span id="p-check-1">Well Maintained</span></div>
+            <div class="check-item"><span class="check-mark">✓</span><span id="p-check-2">Ready for Work or Adventure</span></div>
+            <div class="check-item"><span class="check-mark">✓</span><span id="p-check-3">Finance Available</span></div>
+          </div>
+        </section>
+
+        <footer class="p-footer">
+          <span>📍 VISIT US<br /><b id="p-dealer-address">36 Kock Street, Rustenburg, 0299</b></span>
+          <span>📞 CONTACT US<br /><b id="p-dealer-phone">014 592 0334</b></span>
+          <span>🌐 VIEW MORE<br /><b id="p-dealer-web">www.avuramotors.co.za</b></span>
+          <span class="footer-logo" id="p-footer-dealer">AVURA</span>
+        </footer>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="vehicleData.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
