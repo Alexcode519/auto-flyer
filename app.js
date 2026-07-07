@@ -77,6 +77,7 @@ BRANCH_DATA.forEach((branch, i) => {
 function applyBranch(index) {
   const branch = BRANCH_DATA[index];
   if (!branch) return;
+  $("branch-rename-input").value = branch.name;
   $("dealer-name-input").value = branch.name;
   $("dealer-address-input").value = branch.address;
   $("dealer-phone-input").value = branch.phone;
@@ -85,6 +86,17 @@ function applyBranch(index) {
 
 branchSelect.addEventListener("change", () => {
   applyBranch(Number(branchSelect.value));
+  syncPreview();
+});
+
+// Renaming a branch here updates its dropdown label and its dealer-name
+// default for future switches, so it doesn't need re-typing every time.
+$("branch-rename-input").addEventListener("input", () => {
+  const idx = Number(branchSelect.value);
+  const name = $("branch-rename-input").value;
+  BRANCH_DATA[idx].name = name;
+  branchSelect.options[idx].textContent = name;
+  $("dealer-name-input").value = name;
   syncPreview();
 });
 
