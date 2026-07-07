@@ -405,6 +405,8 @@ function syncPreview() {
 
   const color = $("color-select").value;
   $("p-color").textContent = color;
+  const swatchColor = COLOR_PALETTE.find((c) => c.name === color);
+  if (swatchColor) $("p-color-swatch").style.background = `rgb(${swatchColor.rgb.join(",")})`;
 
   const price = $("price-input").value;
   $("p-price").textContent = price ? `R${formatThousands(price)}` : "R—";
