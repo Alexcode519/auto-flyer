@@ -263,10 +263,13 @@ document.querySelectorAll(".reposition-pad button").forEach((btn) => {
     const slot = pad.dataset.target;
     const pos = imagePosition[slot];
     const dir = btn.dataset.dir;
-    if (dir === "up") pos.y = Math.max(0, pos.y - IMAGE_STEP);
-    if (dir === "down") pos.y = Math.min(100, pos.y + IMAGE_STEP);
-    if (dir === "left") pos.x = Math.max(0, pos.x - IMAGE_STEP);
-    if (dir === "right") pos.x = Math.min(100, pos.x + IMAGE_STEP);
+    // Arrows nudge the photo itself (drag-the-image metaphor), not the crop
+    // viewport -- clicking up moves the image up, revealing more of what's
+    // below it, same convention as Facebook/LinkedIn cover photo repositioning.
+    if (dir === "up") pos.y = Math.min(100, pos.y + IMAGE_STEP);
+    if (dir === "down") pos.y = Math.max(0, pos.y - IMAGE_STEP);
+    if (dir === "left") pos.x = Math.min(100, pos.x + IMAGE_STEP);
+    if (dir === "right") pos.x = Math.max(0, pos.x - IMAGE_STEP);
     applyImagePosition(slot);
   });
 });
