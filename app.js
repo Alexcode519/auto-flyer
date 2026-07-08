@@ -144,6 +144,10 @@ function applyBranchLogo(index) {
     headerImg.src = logo;
     headerImg.hidden = false;
     headerImg.style.maxHeight = `${LOGO_BASE_HEIGHT * scale}px`;
+    // max-width must scale with the slider too, not stay fixed -- otherwise
+    // a wide/horizontal logo hits the width cap almost immediately and the
+    // slider looks like it does nothing past that point.
+    headerImg.style.maxWidth = `${Math.min(96, 70 * scale)}%`;
     logoWrap.style.padding = `${spacing}px 0`;
     $("p-dealer-name-main").hidden = true;
     $("p-dealer-name-sub").hidden = true;
