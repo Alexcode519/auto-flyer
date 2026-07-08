@@ -40,13 +40,30 @@ body {
   border-bottom: 1px solid #ddd;
 }
 
-.field-group h2 {
+.field-group summary {
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #666;
   margin: 0 0 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  list-style: none;
+  user-select: none;
 }
+.field-group[open] summary { margin-bottom: 12px; }
+.field-group:not([open]) summary { margin-bottom: 0; }
+.field-group summary::-webkit-details-marker { display: none; }
+.field-group summary::after {
+  content: "▾";
+  font-size: 11px;
+  color: #999;
+  transition: transform 0.15s ease;
+}
+.field-group:not([open]) summary::after { transform: rotate(-90deg); }
+.field-group summary:hover { color: #333; }
 
 .field {
   display: flex;

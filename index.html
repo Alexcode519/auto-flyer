@@ -20,17 +20,17 @@
   <aside class="form-panel">
     <h1>AutoFlyer</h1>
 
-    <section class="field-group">
-      <h2>1. Branch</h2>
+    <details class="field-group" open>
+      <summary>1. Branch</summary>
       <label class="field">
         <span>Dealership branch</span>
         <select id="branch-select"></select>
       </label>
       <p class="hint">Selecting a branch fills in the dealer info below — pick "Rename current branch" from the dropdown to rename it.</p>
-    </section>
+    </details>
 
-    <section class="field-group">
-      <h2>2. Photos</h2>
+    <details class="field-group" open>
+      <summary>2. Photos</summary>
       <div class="photo-slots">
         <div class="photo-slot hero" data-slot="hero">
           <input type="file" accept="image/*" id="upload-hero" />
@@ -71,10 +71,10 @@
         </div>
       </div>
       <p class="hint">Colour is auto-detected from the hero photo &mdash; override it below if needed.</p>
-    </section>
+    </details>
 
-    <section class="field-group">
-      <h2>3. Vehicle</h2>
+    <details class="field-group" open>
+      <summary>3. Vehicle</summary>
 
       <label class="field">
         <span>Brand</span>
@@ -133,10 +133,10 @@
         <span>Price (ZAR)</span>
         <input type="number" id="price-input" placeholder="e.g. 729900" min="0" />
       </label>
-    </section>
+    </details>
 
-    <section class="field-group">
-      <h2>4. Copy</h2>
+    <details class="field-group" open>
+      <summary>4. Copy</summary>
       <label class="field">
         <span>Headline line 1</span>
         <input type="text" id="tagline1-input" value="BUILT TO WORK." />
@@ -189,10 +189,10 @@
         <input type="text" value="Ready for Work or Adventure" data-check="2" />
         <input type="text" value="Finance Available" data-check="3" />
       </div>
-    </section>
+    </details>
 
-    <section class="field-group">
-      <h2>5. Dealer info</h2>
+    <details class="field-group" open>
+      <summary>5. Dealer info</summary>
       <label class="field">
         <span>Dealer name</span>
         <input type="text" id="dealer-name-input" value="AVURA Executive Auto" />
@@ -211,7 +211,7 @@
           <input type="text" id="dealer-web-input" value="www.avuramotors.co.za" />
         </label>
       </div>
-    </section>
+    </details>
 
     <button id="export-btn" class="export-btn">Download PNG</button>
   </aside>
