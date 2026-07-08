@@ -12,7 +12,9 @@ const BRANCH_DATA = [
     website: "www.avuramotors.co.za",
     fontIndex: 0,
     templateIndex: 0,
-    logo: null
+    logo: null,
+    logoScale: 1,
+    logoSpacing: 0
   },
   {
     name: "AVURA Branch 2 (edit me)",
@@ -21,7 +23,9 @@ const BRANCH_DATA = [
     website: "",
     fontIndex: 0,
     templateIndex: 0,
-    logo: null
+    logo: null,
+    logoScale: 1,
+    logoSpacing: 0
   },
   {
     name: "AVURA Branch 3 (edit me)",
@@ -30,7 +34,9 @@ const BRANCH_DATA = [
     website: "",
     fontIndex: 0,
     templateIndex: 0,
-    logo: null
+    logo: null,
+    logoScale: 1,
+    logoSpacing: 0
   },
   {
     name: "AVURA Branch 4 (edit me)",
@@ -39,7 +45,9 @@ const BRANCH_DATA = [
     website: "",
     fontIndex: 0,
     templateIndex: 0,
-    logo: null
+    logo: null,
+    logoScale: 1,
+    logoSpacing: 0
   },
   {
     name: "AVURA Branch 5 (edit me)",
@@ -48,6 +56,8 @@ const BRANCH_DATA = [
     website: "",
     fontIndex: 0,
     templateIndex: 0,
-    logo: null
+    logo: null,
+    logoScale: 1,
+    logoSpacing: 0
   }
 ];

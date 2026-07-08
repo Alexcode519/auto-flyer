@@ -126,17 +126,25 @@ function applyBranchTemplate(index) {
 // Same per-branch pattern again: a branch with a logo image shows it (top
 // header + footer) instead of the generated text logo; a branch with no
 // logo falls back to the text lockup driven by its dealer name.
+const LOGO_BASE_HEIGHT = 70; // px, matches .p-logo-img's base max-height
+
 function applyBranchLogo(index) {
   const branch = BRANCH_DATA[index];
   const logo = branch && branch.logo;
+  const scale = (branch && branch.logoScale) || 1;
+  const spacing = (branch && branch.logoSpacing) || 0;
   const headerImg = $("p-logo-img");
   const footerImg = $("p-footer-logo-img");
   const previewImg = $("logo-preview-img");
   const previewEmpty = document.querySelector(".logo-preview-empty");
+  const logoWrap = document.querySelector(".p-logo");
+  const adjustRow = $("logo-adjust-row");
 
   if (logo) {
     headerImg.src = logo;
     headerImg.hidden = false;
+    headerImg.style.maxHeight = `${LOGO_BASE_HEIGHT * scale}px`;
+    logoWrap.style.padding = `${spacing}px 0`;
     $("p-dealer-name-main").hidden = true;
     $("p-dealer-name-sub").hidden = true;
     footerImg.src = logo;
@@ -145,14 +153,19 @@ function applyBranchLogo(index) {
     previewImg.src = logo;
     previewImg.hidden = false;
     previewEmpty.hidden = true;
+    adjustRow.hidden = false;
+    $("logo-size-slider").value = scale;
+    $("logo-spacing-slider").value = spacing;
   } else {
     headerImg.hidden = true;
+    logoWrap.style.padding = "";
     $("p-dealer-name-main").hidden = false;
     $("p-dealer-name-sub").hidden = false;
     footerImg.hidden = true;
     $("p-footer-dealer").hidden = false;
     previewImg.hidden = true;
     previewEmpty.hidden = false;
+    adjustRow.hidden = true;
   }
 }
 
@@ -596,7 +609,10 @@ $("upload-logo").addEventListener("change", (e) => {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (ev) => {
-    BRANCH_DATA[currentBranchIndex].logo = ev.target.result;
+    const branch = BRANCH_DATA[currentBranchIndex];
+    branch.logo = ev.target.result;
+    branch.logoScale = 1;
+    branch.logoSpacing = 0;
     applyBranchLogo(currentBranchIndex);
   };
   reader.readAsDataURL(file);
@@ -605,6 +621,16 @@ $("upload-logo").addEventListener("change", (e) => {
 $("logo-remove-btn").addEventListener("click", () => {
   BRANCH_DATA[currentBranchIndex].logo = null;
   $("upload-logo").value = "";
+  applyBranchLogo(currentBranchIndex);
+});
+
+$("logo-size-slider").addEventListener("input", (e) => {
+  BRANCH_DATA[currentBranchIndex].logoScale = Number(e.target.value);
+  applyBranchLogo(currentBranchIndex);
+});
+
+$("logo-spacing-slider").addEventListener("input", (e) => {
+  BRANCH_DATA[currentBranchIndex].logoSpacing = Number(e.target.value);
   applyBranchLogo(currentBranchIndex);
 });
 

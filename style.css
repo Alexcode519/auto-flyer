@@ -604,6 +604,22 @@ body {
   cursor: pointer;
 }
 
+.logo-slider-group {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.logo-slider-group[hidden] { display: none; }
+.logo-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.logo-slider-row span { width: 56px; flex-shrink: 0; }
+.logo-slider-row input[type="range"] { flex: 1; }
+
 @media (max-width: 900px) {
   .app { grid-template-columns: 1fr; }
   .form-panel { border-right: none; border-bottom: 1px solid #d5d5d8; }
