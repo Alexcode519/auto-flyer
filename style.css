@@ -430,7 +430,17 @@ body {
   color: #ccc;
   border-top: 1px solid var(--gold);
 }
-.p-footer b { color: #fff; font-weight: 600; }
+.p-footer b { color: #fff; font-weight: 600; font-size: 12px; }
+.footer-item { display: flex; align-items: center; gap: 8px; }
+.footer-icon { width: 18px; height: 18px; color: var(--gold); flex-shrink: 0; }
+.footer-text { display: flex; flex-direction: column; gap: 2px; line-height: 1.3; }
+.footer-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #999;
+}
 .footer-logo-wrap { display: flex; align-items: center; justify-content: flex-end; }
 .footer-logo {
   color: var(--red);

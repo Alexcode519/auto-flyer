@@ -111,9 +111,18 @@ const LAYOUT_LIBRARY = [
       </section>
 
       <footer class="p-footer">
-        <span>&#128205; VISIT US<br /><b id="p-dealer-address">36 Kock Street, Rustenburg, 0299</b></span>
-        <span>&#128222; CONTACT US<br /><b id="p-dealer-phone">014 592 0334</b></span>
-        <span>&#127760; VIEW MORE<br /><b id="p-dealer-web">www.avuramotors.co.za</b></span>
+        <div class="footer-item">
+          <svg class="footer-icon" viewBox="0 0 24 24"><path d="M12 2C8 2 5 5 5 9c0 6 7 13 7 13s7-7 7-13c0-4-3-7-7-7z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          <span class="footer-text"><span class="footer-label">Visit Us</span><b id="p-dealer-address">36 Kock Street, Rustenburg, 0299</b></span>
+        </div>
+        <div class="footer-item">
+          <svg class="footer-icon" viewBox="0 0 24 24"><path d="M6 3h3l2 5-2.5 1.5a11 11 0 0 0 5 5L15 12l5 2v3a2 2 0 0 1-2 2C10 19 3 12 3 5a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          <span class="footer-text"><span class="footer-label">Contact Us</span><b id="p-dealer-phone">014 592 0334</b></span>
+        </div>
+        <div class="footer-item">
+          <svg class="footer-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M3 12h18M12 3c2.5 2.5 4 6 4 9s-1.5 6.5-4 9c-2.5-2.5-4-6-4-9s1.5-6.5 4-9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          <span class="footer-text"><span class="footer-label">View More</span><b id="p-dealer-web">www.avuramotors.co.za</b></span>
+        </div>
         <span class="footer-logo-wrap">
           <img id="p-footer-logo-img" class="p-footer-logo-img" hidden />
           <span class="footer-logo" id="p-footer-dealer">AVURA</span>
@@ -229,9 +238,18 @@ const LAYOUT_LIBRARY = [
       </section>
 
       <footer class="p-footer">
-        <span>&#128205; VISIT US<br /><b id="p-dealer-address">36 Kock Street, Rustenburg, 0299</b></span>
-        <span>&#128222; CONTACT US<br /><b id="p-dealer-phone">014 592 0334</b></span>
-        <span>&#127760; VIEW MORE<br /><b id="p-dealer-web">www.avuramotors.co.za</b></span>
+        <div class="footer-item">
+          <svg class="footer-icon" viewBox="0 0 24 24"><path d="M12 2C8 2 5 5 5 9c0 6 7 13 7 13s7-7 7-13c0-4-3-7-7-7z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          <span class="footer-text"><span class="footer-label">Visit Us</span><b id="p-dealer-address">36 Kock Street, Rustenburg, 0299</b></span>
+        </div>
+        <div class="footer-item">
+          <svg class="footer-icon" viewBox="0 0 24 24"><path d="M6 3h3l2 5-2.5 1.5a11 11 0 0 0 5 5L15 12l5 2v3a2 2 0 0 1-2 2C10 19 3 12 3 5a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          <span class="footer-text"><span class="footer-label">Contact Us</span><b id="p-dealer-phone">014 592 0334</b></span>
+        </div>
+        <div class="footer-item">
+          <svg class="footer-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M3 12h18M12 3c2.5 2.5 4 6 4 9s-1.5 6.5-4 9c-2.5-2.5-4-6-4-9s1.5-6.5 4-9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          <span class="footer-text"><span class="footer-label">View More</span><b id="p-dealer-web">www.avuramotors.co.za</b></span>
+        </div>
         <span class="footer-logo-wrap">
           <img id="p-footer-logo-img" class="p-footer-logo-img" hidden />
           <span class="footer-logo" id="p-footer-dealer">AVURA</span>
@@ -344,9 +362,18 @@ const LAYOUT_LIBRARY = [
       </div>
 
       <footer class="p-footer">
-        <span>&#128205; VISIT US<br /><b id="p-dealer-address">36 Kock Street, Rustenburg, 0299</b></span>
-        <span>&#128222; CONTACT US<br /><b id="p-dealer-phone">014 592 0334</b></span>
-        <span>&#127760; VIEW MORE<br /><b id="p-dealer-web">www.avuramotors.co.za</b></span>
+        <div class="footer-item">
+          <svg class="footer-icon" viewBox="0 0 24 24"><path d="M12 2C8 2 5 5 5 9c0 6 7 13 7 13s7-7 7-13c0-4-3-7-7-7z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          <span class="footer-text"><span class="footer-label">Visit Us</span><b id="p-dealer-address">36 Kock Street, Rustenburg, 0299</b></span>
+        </div>
+        <div class="footer-item">
+          <svg class="footer-icon" viewBox="0 0 24 24"><path d="M6 3h3l2 5-2.5 1.5a11 11 0 0 0 5 5L15 12l5 2v3a2 2 0 0 1-2 2C10 19 3 12 3 5a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          <span class="footer-text"><span class="footer-label">Contact Us</span><b id="p-dealer-phone">014 592 0334</b></span>
+        </div>
+        <div class="footer-item">
+          <svg class="footer-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M3 12h18M12 3c2.5 2.5 4 6 4 9s-1.5 6.5-4 9c-2.5-2.5-4-6-4-9s1.5-6.5 4-9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          <span class="footer-text"><span class="footer-label">View More</span><b id="p-dealer-web">www.avuramotors.co.za</b></span>
+        </div>
         <span class="footer-logo-wrap">
           <img id="p-footer-logo-img" class="p-footer-logo-img" hidden />
           <span class="footer-logo" id="p-footer-dealer">AVURA</span>
@@ -460,9 +487,18 @@ const LAYOUT_LIBRARY = [
       </section>
 
       <footer class="p-footer">
-        <span>&#128205; VISIT US<br /><b id="p-dealer-address">36 Kock Street, Rustenburg, 0299</b></span>
-        <span>&#128222; CONTACT US<br /><b id="p-dealer-phone">014 592 0334</b></span>
-        <span>&#127760; VIEW MORE<br /><b id="p-dealer-web">www.avuramotors.co.za</b></span>
+        <div class="footer-item">
+          <svg class="footer-icon" viewBox="0 0 24 24"><path d="M12 2C8 2 5 5 5 9c0 6 7 13 7 13s7-7 7-13c0-4-3-7-7-7z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          <span class="footer-text"><span class="footer-label">Visit Us</span><b id="p-dealer-address">36 Kock Street, Rustenburg, 0299</b></span>
+        </div>
+        <div class="footer-item">
+          <svg class="footer-icon" viewBox="0 0 24 24"><path d="M6 3h3l2 5-2.5 1.5a11 11 0 0 0 5 5L15 12l5 2v3a2 2 0 0 1-2 2C10 19 3 12 3 5a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          <span class="footer-text"><span class="footer-label">Contact Us</span><b id="p-dealer-phone">014 592 0334</b></span>
+        </div>
+        <div class="footer-item">
+          <svg class="footer-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M3 12h18M12 3c2.5 2.5 4 6 4 9s-1.5 6.5-4 9c-2.5-2.5-4-6-4-9s1.5-6.5 4-9z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          <span class="footer-text"><span class="footer-label">View More</span><b id="p-dealer-web">www.avuramotors.co.za</b></span>
+        </div>
         <span class="footer-logo-wrap">
           <img id="p-footer-logo-img" class="p-footer-logo-img" hidden />
           <span class="footer-logo" id="p-footer-dealer">AVURA</span>
