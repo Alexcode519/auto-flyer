@@ -93,6 +93,7 @@ function applyBranch(index) {
   $("dealer-phone-input").value = branch.phone;
   $("dealer-web-input").value = branch.website;
   applyBranchFont(index);
+  applyBranchBackground(index);
   applyBranchLogo(index);
 }
 
@@ -103,6 +104,18 @@ function applyBranchFont(index) {
   const fontIndex = (branch && branch.fontIndex) || 0;
   $("pamphlet").style.fontFamily = FONT_LIBRARY[fontIndex].stack;
   $("font-select").value = fontIndex;
+}
+
+// Same per-branch pattern as font: background is set directly on #pamphlet
+// (built from the fixed --gold/--bg-dark/--bg-darker vars), so it re-skins
+// only the flyer's surface, not the app's own chrome.
+function applyBranchBackground(index) {
+  const branch = BRANCH_DATA[index];
+  const backgroundIndex = (branch && branch.backgroundIndex) || 0;
+  $("pamphlet").style.background = BACKGROUND_LIBRARY[backgroundIndex].css;
+  document.querySelectorAll(".background-swatch").forEach((el, i) => {
+    el.classList.toggle("active", i === backgroundIndex);
+  });
 }
 
 // Same per-branch pattern again: a branch with a logo image shows it (top
@@ -608,6 +621,7 @@ function applyLayout(index) {
 // fields, and each photo's upload + crop position).
 function rehydratePamphlet() {
   applyBranchFont(currentBranchIndex);
+  applyBranchBackground(currentBranchIndex);
   applyBranchLogo(currentBranchIndex);
 
   document.querySelectorAll(".icon-select").forEach((select) => {
@@ -639,6 +653,20 @@ LAYOUT_LIBRARY.forEach((layout, i) => {
   swatch.innerHTML = `<svg viewBox="0 0 48 48">${layout.preview}</svg><span>${layout.name}</span>`;
   swatch.addEventListener("click", () => applyLayout(i));
   layoutGrid.appendChild(swatch);
+});
+
+// ---------- Background picker ----------
+const backgroundGrid = $("background-grid");
+BACKGROUND_LIBRARY.forEach((bg, i) => {
+  const swatch = document.createElement("button");
+  swatch.type = "button";
+  swatch.className = "background-swatch";
+  swatch.innerHTML = `<span class="background-swatch-preview" style="background:${bg.css}"></span><span>${bg.name}</span>`;
+  swatch.addEventListener("click", () => {
+    BRANCH_DATA[currentBranchIndex].backgroundIndex = i;
+    applyBranchBackground(currentBranchIndex);
+  });
+  backgroundGrid.appendChild(swatch);
 });
 
 // ---------- Logo upload ----------
