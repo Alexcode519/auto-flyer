@@ -10,6 +10,10 @@
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+<button type="button" id="settings-btn" class="settings-btn" aria-label="Settings">
+  <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" stroke="currentColor" stroke-width="2" fill="none"/><path d="M19.4 13.5a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V19.5a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H4.5a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H10a1.65 1.65 0 0 0 1-1.51V4.5a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V10a1.65 1.65 0 0 0 1.51 1h.09a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+</button>
+
 <div class="app">
 
   <!-- ============ FORM PANEL ============ -->
@@ -209,14 +213,6 @@
       </div>
     </section>
 
-    <section class="field-group">
-      <h2>6. Style</h2>
-      <label class="field">
-        <span>Font</span>
-        <select id="font-select"></select>
-      </label>
-    </section>
-
     <button id="export-btn" class="export-btn">Download PNG</button>
   </aside>
 
@@ -334,6 +330,22 @@
       </div>
     </div>
   </main>
+</div>
+
+<div id="settings-modal" class="crop-modal" hidden>
+  <div class="crop-modal-content settings-modal-content">
+    <h3>Settings</h3>
+
+    <div class="settings-group">
+      <span class="subheading">Font</span>
+      <select id="font-select"></select>
+      <p class="hint">Applies to all text on the flyer.</p>
+    </div>
+
+    <div class="crop-modal-actions">
+      <button type="button" id="settings-done-btn" class="export-btn">Done</button>
+    </div>
+  </div>
 </div>
 
 <div id="crop-modal" class="crop-modal" hidden>

@@ -508,6 +508,21 @@ fontSelect.addEventListener("change", () => {
   $("pamphlet").style.fontFamily = FONT_LIBRARY[Number(fontSelect.value)].stack;
 });
 
+// ---------- Settings modal ----------
+// Houses flyer-wide options (currently just Font) behind a single top-right
+// icon, kept separate from the per-vehicle form fields so it's a natural
+// place to add more global options later without crowding the sidebar.
+const settingsModal = $("settings-modal");
+$("settings-btn").addEventListener("click", () => {
+  settingsModal.hidden = false;
+});
+$("settings-done-btn").addEventListener("click", () => {
+  settingsModal.hidden = true;
+});
+settingsModal.addEventListener("click", (e) => {
+  if (e.target === settingsModal) settingsModal.hidden = true;
+});
+
 // ---------- Year dropdown ----------
 (function populateYears() {
   const select = $("year-input");
