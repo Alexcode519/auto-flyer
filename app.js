@@ -325,8 +325,7 @@ const SLOT_TO_PREVIEW = {
 
 // ---------- Image repositioning + zoom (crop editor modal) ----------
 const IMAGE_STEP = 8; // percent nudged per click
-const HERO_ASPECT = "700 / 260";
-const GALLERY_ASPECT = "1 / 1";
+const GALLERY_ASPECT = "1 / 1"; // fallback only, if the real box can't be measured yet
 const imagePosition = {
   hero: { x: 50, y: 50, scale: 1 }, g1: { x: 50, y: 50, scale: 1 }, g2: { x: 50, y: 50, scale: 1 },
   g3: { x: 50, y: 50, scale: 1 }, g4: { x: 50, y: 50, scale: 1 }
@@ -380,7 +379,13 @@ const cropZoomSlider = $("crop-zoom-slider");
 function openCropModal(slot) {
   cropModalSlot = slot;
   cropModalImg.style.backgroundImage = `url("${state.images[slot] || ""}")`;
-  cropModalFrame.style.aspectRatio = slot === "hero" ? HERO_ASPECT : GALLERY_ASPECT;
+  // Aspect ratio is read from the actual photo box being cropped, not a
+  // fixed constant -- different layouts render the hero/gallery boxes at
+  // different proportions, so the crop preview must match whichever one
+  // is actually being edited or the crop won't line up with the real flyer.
+  const pImg = $(SLOT_TO_PREVIEW[slot].img);
+  const rect = pImg.getBoundingClientRect();
+  cropModalFrame.style.aspectRatio = rect.width && rect.height ? `${rect.width} / ${rect.height}` : GALLERY_ASPECT;
   cropZoomSlider.value = imagePosition[slot].scale;
   // Must unhide before measuring -- getBoundingClientRect on a display:none
   // element (still hidden at this point) would return a 0x0 rect.
@@ -393,8 +398,13 @@ function closeCropModal() {
   cropModalSlot = null;
 }
 
-document.querySelectorAll(".crop-btn").forEach((btn) => {
-  btn.addEventListener("click", () => openCropModal(btn.dataset.target));
+// Delegated on #pamphlet (a node that's never itself replaced, only its
+// innerHTML) rather than attached to each .crop-btn directly -- layout
+// swaps destroy and recreate every .crop-btn, which would silently drop
+// direct listeners. Delegation survives any number of innerHTML swaps.
+$("pamphlet").addEventListener("click", (e) => {
+  const btn = e.target.closest(".crop-btn");
+  if (btn) openCropModal(btn.dataset.target);
 });
 
 $("crop-done-btn").addEventListener("click", closeCropModal);
@@ -595,6 +605,61 @@ fontSelect.addEventListener("change", () => {
   $("pamphlet").style.fontFamily = FONT_LIBRARY[fontIndex].stack;
 });
 
+// ---------- Layout picker ----------
+// Layout is a global choice (not per-branch like font/colour/logo) -- it's
+// "which flyer structure am I building" rather than a per-dealership trait.
+let currentLayoutIndex = 0;
+
+function applyLayout(index) {
+  currentLayoutIndex = index;
+  $("pamphlet").innerHTML = LAYOUT_LIBRARY[index].html;
+  $("pamphlet").className = `pamphlet layout-${LAYOUT_LIBRARY[index].id}`;
+  rehydratePamphlet();
+  document.querySelectorAll(".layout-swatch").forEach((el, i) => {
+    el.classList.toggle("active", i === index);
+  });
+}
+
+// Re-applies every piece of live state onto a freshly swapped-in layout's
+// markup, since #pamphlet.innerHTML replacement destroys and recreates every
+// element inside it (branch-driven font/colour/logo, feature icons, all text
+// fields, and each photo's upload + crop position).
+function rehydratePamphlet() {
+  applyBranchFont(currentBranchIndex);
+  applyBranchTemplate(currentBranchIndex);
+  applyBranchLogo(currentBranchIndex);
+
+  document.querySelectorAll(".icon-select").forEach((select) => {
+    const idx = select.dataset.featureIcon;
+    const iconEl = $(`p-feature-${idx}-icon`);
+    if (iconEl) iconEl.innerHTML = ICON_LIBRARY[select.value].svg;
+  });
+
+  syncPreview();
+
+  Object.keys(SLOT_TO_PREVIEW).forEach((slot) => {
+    const target = SLOT_TO_PREVIEW[slot];
+    const pImg = $(target.img);
+    if (!state.images[slot]) return; // stays at the fresh markup's default empty state
+    pImg.style.backgroundImage = `url("${state.images[slot]}")`;
+    pImg.hidden = false;
+    if (target.empty) $(target.empty).hidden = true;
+    applyImagePosition(slot);
+    const cropBtn = document.querySelector(`.crop-btn[data-target="${slot}"]`);
+    if (cropBtn) cropBtn.hidden = false;
+  });
+}
+
+const layoutGrid = $("layout-grid");
+LAYOUT_LIBRARY.forEach((layout, i) => {
+  const swatch = document.createElement("button");
+  swatch.type = "button";
+  swatch.className = "layout-swatch";
+  swatch.innerHTML = `<svg viewBox="0 0 48 48">${layout.preview}</svg><span>${layout.name}</span>`;
+  swatch.addEventListener("click", () => applyLayout(i));
+  layoutGrid.appendChild(swatch);
+});
+
 // ---------- Template picker ----------
 const templateGrid = $("template-grid");
 TEMPLATE_LIBRARY.forEach((t, i) => {
@@ -671,5 +736,9 @@ settingsModal.addEventListener("click", (e) => {
 
 // initial defaults
 $("year-input").value = "2021";
-applyBranch(0);
-syncPreview();
+// applyLayout populates #pamphlet (which starts empty in index.html) and
+// rehydrates it -- this covers font/colour/logo application and syncPreview,
+// so a separate applyBranch(0)/syncPreview() call isn't needed here (the
+// sidebar's dealer-name/address/phone/web inputs already carry branch 0's
+// values as their HTML defaults).
+applyLayout(0);
