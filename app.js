@@ -94,6 +94,7 @@ function applyBranch(index) {
   $("dealer-web-input").value = branch.website;
   applyBranchFont(index);
   applyBranchTemplate(index);
+  applyBranchLogo(index);
 }
 
 // Each branch remembers its own font choice; switching branches swaps the
@@ -120,6 +121,39 @@ function applyBranchTemplate(index) {
   document.querySelectorAll(".template-swatch").forEach((el, i) => {
     el.classList.toggle("active", i === templateIndex);
   });
+}
+
+// Same per-branch pattern again: a branch with a logo image shows it (top
+// header + footer) instead of the generated text logo; a branch with no
+// logo falls back to the text lockup driven by its dealer name.
+function applyBranchLogo(index) {
+  const branch = BRANCH_DATA[index];
+  const logo = branch && branch.logo;
+  const headerImg = $("p-logo-img");
+  const footerImg = $("p-footer-logo-img");
+  const previewImg = $("logo-preview-img");
+  const previewEmpty = document.querySelector(".logo-preview-empty");
+
+  if (logo) {
+    headerImg.src = logo;
+    headerImg.hidden = false;
+    $("p-dealer-name-main").hidden = true;
+    $("p-dealer-name-sub").hidden = true;
+    footerImg.src = logo;
+    footerImg.hidden = false;
+    $("p-footer-dealer").hidden = true;
+    previewImg.src = logo;
+    previewImg.hidden = false;
+    previewEmpty.hidden = true;
+  } else {
+    headerImg.hidden = true;
+    $("p-dealer-name-main").hidden = false;
+    $("p-dealer-name-sub").hidden = false;
+    footerImg.hidden = true;
+    $("p-footer-dealer").hidden = false;
+    previewImg.hidden = true;
+    previewEmpty.hidden = false;
+  }
 }
 
 // The "Rename current branch" entry is folded into the dropdown itself
@@ -554,6 +588,24 @@ TEMPLATE_LIBRARY.forEach((t, i) => {
     applyBranchTemplate(currentBranchIndex);
   });
   templateGrid.appendChild(swatch);
+});
+
+// ---------- Logo upload ----------
+$("upload-logo").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    BRANCH_DATA[currentBranchIndex].logo = ev.target.result;
+    applyBranchLogo(currentBranchIndex);
+  };
+  reader.readAsDataURL(file);
+});
+
+$("logo-remove-btn").addEventListener("click", () => {
+  BRANCH_DATA[currentBranchIndex].logo = null;
+  $("upload-logo").value = "";
+  applyBranchLogo(currentBranchIndex);
 });
 
 // ---------- Settings modal ----------

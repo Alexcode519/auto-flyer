@@ -223,6 +223,7 @@
 
         <header class="p-header">
           <div class="p-logo">
+            <img id="p-logo-img" class="p-logo-img" hidden />
             <span class="logo-main" id="p-dealer-name-main">AVURA</span>
             <span class="logo-sub" id="p-dealer-name-sub">Executive Auto</span>
           </div>
@@ -324,7 +325,10 @@
           <span>📍 VISIT US<br /><b id="p-dealer-address">36 Kock Street, Rustenburg, 0299</b></span>
           <span>📞 CONTACT US<br /><b id="p-dealer-phone">014 592 0334</b></span>
           <span>🌐 VIEW MORE<br /><b id="p-dealer-web">www.avuramotors.co.za</b></span>
-          <span class="footer-logo" id="p-footer-dealer">AVURA</span>
+          <span class="footer-logo-wrap">
+            <img id="p-footer-logo-img" class="p-footer-logo-img" hidden />
+            <span class="footer-logo" id="p-footer-dealer">AVURA</span>
+          </span>
         </footer>
 
       </div>
@@ -335,6 +339,22 @@
 <div id="settings-modal" class="crop-modal" hidden>
   <div class="crop-modal-content settings-modal-content">
     <h3>Settings</h3>
+
+    <div class="settings-group">
+      <span class="subheading">Logo</span>
+      <div class="logo-upload-row">
+        <div class="logo-preview" id="logo-preview">
+          <span class="logo-preview-empty">Text logo</span>
+          <img id="logo-preview-img" hidden />
+        </div>
+        <div class="logo-upload-actions">
+          <input type="file" accept="image/*" id="upload-logo" hidden />
+          <label for="upload-logo" class="crop-secondary-btn logo-upload-btn">Upload logo</label>
+          <button type="button" id="logo-remove-btn" class="crop-secondary-btn">Use text</button>
+        </div>
+      </div>
+      <p class="hint">Replaces the "AVURA" text with your image, top and bottom of the flyer.</p>
+    </div>
 
     <div class="settings-group">
       <span class="subheading">Template</span>
