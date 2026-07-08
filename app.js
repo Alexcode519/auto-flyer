@@ -493,6 +493,21 @@ $("export-btn").addEventListener("click", () => {
   });
 });
 
+// ---------- Font picker ----------
+// Applying font-family to the .pamphlet root cascades to every text element
+// inside it (nothing under it sets its own font-family), so one selector
+// controls all flyer text at once.
+const fontSelect = $("font-select");
+FONT_LIBRARY.forEach((font, i) => {
+  const opt = document.createElement("option");
+  opt.value = i;
+  opt.textContent = font.label;
+  fontSelect.appendChild(opt);
+});
+fontSelect.addEventListener("change", () => {
+  $("pamphlet").style.fontFamily = FONT_LIBRARY[Number(fontSelect.value)].stack;
+});
+
 // ---------- Year dropdown ----------
 (function populateYears() {
   const select = $("year-input");
