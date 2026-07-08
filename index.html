@@ -233,7 +233,7 @@
             <span class="badge-variant" id="p-badge-variant">79 SERIES</span>
           </div>
           <div class="p-hero-photo">
-            <img id="p-hero-img" hidden />
+            <div id="p-hero-img" class="photo-bg" hidden></div>
             <span class="photo-empty" id="p-hero-empty">Hero photo</span>
             <button type="button" class="crop-btn" data-target="hero" aria-label="Crop photo" hidden>
               <svg viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14" stroke="currentColor" stroke-width="2" fill="none"/><path d="M18 22V8a2 2 0 0 0-2-2H2" stroke="currentColor" stroke-width="2" fill="none"/></svg>
@@ -266,25 +266,25 @@
 
         <section class="p-gallery">
           <div class="gallery-cell">
-            <img id="p-g1-img" hidden /><span class="photo-empty" id="p-g1-empty">Interior</span>
+            <div id="p-g1-img" class="photo-bg" hidden></div><span class="photo-empty" id="p-g1-empty">Interior</span>
             <button type="button" class="crop-btn" data-target="g1" aria-label="Crop photo" hidden>
               <svg viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14" stroke="currentColor" stroke-width="2" fill="none"/><path d="M18 22V8a2 2 0 0 0-2-2H2" stroke="currentColor" stroke-width="2" fill="none"/></svg>
             </button>
           </div>
           <div class="gallery-cell">
-            <img id="p-g2-img" hidden /><span class="photo-empty" id="p-g2-empty">Rear 3/4</span>
+            <div id="p-g2-img" class="photo-bg" hidden></div><span class="photo-empty" id="p-g2-empty">Rear 3/4</span>
             <button type="button" class="crop-btn" data-target="g2" aria-label="Crop photo" hidden>
               <svg viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14" stroke="currentColor" stroke-width="2" fill="none"/><path d="M18 22V8a2 2 0 0 0-2-2H2" stroke="currentColor" stroke-width="2" fill="none"/></svg>
             </button>
           </div>
           <div class="gallery-cell">
-            <img id="p-g3-img" hidden /><span class="photo-empty" id="p-g3-empty">Front</span>
+            <div id="p-g3-img" class="photo-bg" hidden></div><span class="photo-empty" id="p-g3-empty">Front</span>
             <button type="button" class="crop-btn" data-target="g3" aria-label="Crop photo" hidden>
               <svg viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14" stroke="currentColor" stroke-width="2" fill="none"/><path d="M18 22V8a2 2 0 0 0-2-2H2" stroke="currentColor" stroke-width="2" fill="none"/></svg>
             </button>
           </div>
           <div class="gallery-cell">
-            <img id="p-g4-img" hidden /><span class="photo-empty" id="p-g4-empty">Load bed</span>
+            <div id="p-g4-img" class="photo-bg" hidden></div><span class="photo-empty" id="p-g4-empty">Load bed</span>
             <button type="button" class="crop-btn" data-target="g4" aria-label="Crop photo" hidden>
               <svg viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14" stroke="currentColor" stroke-width="2" fill="none"/><path d="M18 22V8a2 2 0 0 0-2-2H2" stroke="currentColor" stroke-width="2" fill="none"/></svg>
             </button>
@@ -329,7 +329,7 @@
   <div class="crop-modal-content">
     <h3>Adjust photo</h3>
     <div class="crop-modal-frame" id="crop-modal-frame">
-      <img id="crop-modal-img" />
+      <div id="crop-modal-img" class="photo-bg"></div>
     </div>
     <div class="crop-modal-controls">
       <div class="crop-zoom">

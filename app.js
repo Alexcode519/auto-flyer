@@ -248,25 +248,32 @@ const imagePosition = {
   hero: { x: 50, y: 50, scale: 1 }, g1: { x: 50, y: 50, scale: 1 }, g2: { x: 50, y: 50, scale: 1 },
   g3: { x: 50, y: 50, scale: 1 }, g4: { x: 50, y: 50, scale: 1 }
 };
+const naturalSize = {}; // slot -> { w, h } of the uploaded photo's real pixel dimensions
 let cropModalSlot = null;
+
+// Sets background-size in real pixels (cover-fit size * zoom), so
+// background-position's 0-100% range is always recomputed against the
+// *current* zoomed size -- unlike object-position combined with a separate
+// transform:scale, which freezes the pannable range at the pre-zoom size and
+// silently caps travel in whichever axis had no slack at zoom 1.
+function fitBackground(el, natural, pos) {
+  const rect = el.getBoundingClientRect();
+  if (!rect.width || !rect.height || !natural) return;
+  const coverScale = Math.max(rect.width / natural.w, rect.height / natural.h);
+  const finalScale = coverScale * pos.scale;
+  el.style.backgroundSize = `${natural.w * finalScale}px ${natural.h * finalScale}px`;
+  el.style.backgroundPosition = `${pos.x}% ${pos.y}%`;
+}
 
 // Only the flyer image and the modal's own preview reflect crop adjustments;
 // the small sidebar thumbnail under "2. Photos" intentionally stays as the
 // plain uploaded photo so it remains a stable reference thumbnail.
 function applyImagePosition(slot) {
   const pos = imagePosition[slot];
-  const objectPosition = `${pos.x}% ${pos.y}%`;
-  const transform = `scale(${pos.scale})`;
+  const natural = naturalSize[slot];
   const pImg = $(SLOT_TO_PREVIEW[slot].img);
-  if (pImg) {
-    pImg.style.objectPosition = objectPosition;
-    pImg.style.transform = transform;
-  }
-  if (cropModalSlot === slot) {
-    const modalImg = $("crop-modal-img");
-    modalImg.style.objectPosition = objectPosition;
-    modalImg.style.transform = transform;
-  }
+  if (pImg && !pImg.hidden) fitBackground(pImg, natural, pos);
+  if (cropModalSlot === slot) fitBackground(cropModalImg, natural, pos);
 }
 
 function nudge(slot, dir) {
@@ -289,11 +296,13 @@ const cropZoomSlider = $("crop-zoom-slider");
 
 function openCropModal(slot) {
   cropModalSlot = slot;
-  cropModalImg.src = state.images[slot] || "";
+  cropModalImg.style.backgroundImage = `url("${state.images[slot] || ""}")`;
   cropModalFrame.style.aspectRatio = slot === "hero" ? HERO_ASPECT : GALLERY_ASPECT;
   cropZoomSlider.value = imagePosition[slot].scale;
-  applyImagePosition(slot);
+  // Must unhide before measuring -- getBoundingClientRect on a display:none
+  // element (still hidden at this point) would return a 0x0 rect.
   cropModal.hidden = false;
+  applyImagePosition(slot);
 }
 
 function closeCropModal() {
@@ -355,26 +364,28 @@ Object.keys(SLOT_TO_PREVIEW).forEach((slot) => {
       // update pamphlet preview
       const target = SLOT_TO_PREVIEW[slot];
       const pImg = $(target.img);
-      pImg.src = dataUrl;
+      pImg.style.backgroundImage = `url("${dataUrl}")`;
       pImg.hidden = false;
       if (target.empty) $(target.empty).hidden = true;
 
-      // reset and reveal this slot's crop control for the new image
+      // reset this slot's crop state, then measure the real photo dimensions
+      // (needed to compute cover-fit + zoom sizing) before positioning it
       imagePosition[slot] = { x: 50, y: 50, scale: 1 };
-      applyImagePosition(slot);
-      const cropBtn = document.querySelector(`.crop-btn[data-target="${slot}"]`);
-      if (cropBtn) cropBtn.hidden = false;
-
-      if (slot === "hero") {
-        const tmpImg = new Image();
-        tmpImg.onload = () => {
+      const tmpImg = new Image();
+      tmpImg.onload = () => {
+        naturalSize[slot] = { w: tmpImg.naturalWidth, h: tmpImg.naturalHeight };
+        applyImagePosition(slot);
+        if (slot === "hero") {
           detectColorFromImage(tmpImg, (colorName) => {
             $("color-select").value = colorName;
             syncPreview();
           });
-        };
-        tmpImg.src = dataUrl;
-      }
+        }
+      };
+      tmpImg.src = dataUrl;
+
+      const cropBtn = document.querySelector(`.crop-btn[data-target="${slot}"]`);
+      if (cropBtn) cropBtn.hidden = false;
     };
     reader.readAsDataURL(file);
   });
