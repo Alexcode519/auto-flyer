@@ -93,6 +93,7 @@ function applyBranch(index) {
   $("dealer-phone-input").value = branch.phone;
   $("dealer-web-input").value = branch.website;
   applyBranchFont(index);
+  applyBranchTemplate(index);
 }
 
 // Each branch remembers its own font choice; switching branches swaps the
@@ -102,6 +103,23 @@ function applyBranchFont(index) {
   const fontIndex = (branch && branch.fontIndex) || 0;
   $("pamphlet").style.fontFamily = FONT_LIBRARY[fontIndex].stack;
   $("font-select").value = fontIndex;
+}
+
+// Same per-branch pattern as the font: each branch remembers its own colour
+// template. Setting the 4 custom properties directly on #pamphlet (rather
+// than :root) re-skins only the flyer, not the app's own buttons/modals.
+function applyBranchTemplate(index) {
+  const branch = BRANCH_DATA[index];
+  const templateIndex = (branch && branch.templateIndex) || 0;
+  const t = TEMPLATE_LIBRARY[templateIndex];
+  const pamphlet = $("pamphlet");
+  pamphlet.style.setProperty("--gold", t.gold);
+  pamphlet.style.setProperty("--red", t.red);
+  pamphlet.style.setProperty("--bg-dark", t.bgDark);
+  pamphlet.style.setProperty("--bg-darker", t.bgDarker);
+  document.querySelectorAll(".template-swatch").forEach((el, i) => {
+    el.classList.toggle("active", i === templateIndex);
+  });
 }
 
 // The "Rename current branch" entry is folded into the dropdown itself
@@ -520,6 +538,22 @@ fontSelect.addEventListener("change", () => {
   const fontIndex = Number(fontSelect.value);
   BRANCH_DATA[currentBranchIndex].fontIndex = fontIndex;
   $("pamphlet").style.fontFamily = FONT_LIBRARY[fontIndex].stack;
+});
+
+// ---------- Template picker ----------
+const templateGrid = $("template-grid");
+TEMPLATE_LIBRARY.forEach((t, i) => {
+  const swatch = document.createElement("button");
+  swatch.type = "button";
+  swatch.className = "template-swatch";
+  swatch.title = t.name;
+  swatch.setAttribute("aria-label", t.name);
+  swatch.style.background = `linear-gradient(135deg, ${t.bgDark} 0%, ${t.bgDark} 45%, ${t.gold} 45%, ${t.gold} 72%, ${t.red} 72%, ${t.red} 100%)`;
+  swatch.addEventListener("click", () => {
+    BRANCH_DATA[currentBranchIndex].templateIndex = i;
+    applyBranchTemplate(currentBranchIndex);
+  });
+  templateGrid.appendChild(swatch);
 });
 
 // ---------- Settings modal ----------
