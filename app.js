@@ -93,7 +93,6 @@ function applyBranch(index) {
   $("dealer-phone-input").value = branch.phone;
   $("dealer-web-input").value = branch.website;
   applyBranchFont(index);
-  applyBranchTemplate(index);
   applyBranchLogo(index);
 }
 
@@ -104,23 +103,6 @@ function applyBranchFont(index) {
   const fontIndex = (branch && branch.fontIndex) || 0;
   $("pamphlet").style.fontFamily = FONT_LIBRARY[fontIndex].stack;
   $("font-select").value = fontIndex;
-}
-
-// Same per-branch pattern as the font: each branch remembers its own colour
-// template. Setting the 4 custom properties directly on #pamphlet (rather
-// than :root) re-skins only the flyer, not the app's own buttons/modals.
-function applyBranchTemplate(index) {
-  const branch = BRANCH_DATA[index];
-  const templateIndex = (branch && branch.templateIndex) || 0;
-  const t = TEMPLATE_LIBRARY[templateIndex];
-  const pamphlet = $("pamphlet");
-  pamphlet.style.setProperty("--gold", t.gold);
-  pamphlet.style.setProperty("--red", t.red);
-  pamphlet.style.setProperty("--bg-dark", t.bgDark);
-  pamphlet.style.setProperty("--bg-darker", t.bgDarker);
-  document.querySelectorAll(".template-swatch").forEach((el, i) => {
-    el.classList.toggle("active", i === templateIndex);
-  });
 }
 
 // Same per-branch pattern again: a branch with a logo image shows it (top
@@ -626,7 +608,6 @@ function applyLayout(index) {
 // fields, and each photo's upload + crop position).
 function rehydratePamphlet() {
   applyBranchFont(currentBranchIndex);
-  applyBranchTemplate(currentBranchIndex);
   applyBranchLogo(currentBranchIndex);
 
   document.querySelectorAll(".icon-select").forEach((select) => {
@@ -658,22 +639,6 @@ LAYOUT_LIBRARY.forEach((layout, i) => {
   swatch.innerHTML = `<svg viewBox="0 0 48 48">${layout.preview}</svg><span>${layout.name}</span>`;
   swatch.addEventListener("click", () => applyLayout(i));
   layoutGrid.appendChild(swatch);
-});
-
-// ---------- Template picker ----------
-const templateGrid = $("template-grid");
-TEMPLATE_LIBRARY.forEach((t, i) => {
-  const swatch = document.createElement("button");
-  swatch.type = "button";
-  swatch.className = "template-swatch";
-  swatch.title = t.name;
-  swatch.setAttribute("aria-label", t.name);
-  swatch.style.background = `linear-gradient(135deg, ${t.bgDark} 0%, ${t.bgDark} 45%, ${t.gold} 45%, ${t.gold} 72%, ${t.red} 72%, ${t.red} 100%)`;
-  swatch.addEventListener("click", () => {
-    BRANCH_DATA[currentBranchIndex].templateIndex = i;
-    applyBranchTemplate(currentBranchIndex);
-  });
-  templateGrid.appendChild(swatch);
 });
 
 // ---------- Logo upload ----------

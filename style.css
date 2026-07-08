@@ -575,22 +575,6 @@ body {
 }
 .settings-group .hint { color: #999; }
 
-.template-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-}
-.template-swatch {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 8px;
-  border: 2px solid transparent;
-  cursor: pointer;
-  overflow: hidden;
-  padding: 0;
-}
-.template-swatch.active { border-color: #fff; }
-
 .layout-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

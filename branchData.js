@@ -1,8 +1,7 @@
 // Dealership branches. First entry is the real, confirmed branch; the rest
 // are placeholders to be filled in with real details per-branch.
-// fontIndex refers to FONT_LIBRARY (see fontData.js) and templateIndex to
-// TEMPLATE_LIBRARY (see templateData.js) -- each branch remembers its own
-// font, colour template, and logo (a data URL, or null to use the text
+// fontIndex refers to FONT_LIBRARY (see fontData.js) -- each branch
+// remembers its own font and logo (a data URL, or null to use the text
 // logo), since different branches may want a different flyer style.
 const BRANCH_DATA = [
   {
@@ -11,7 +10,6 @@ const BRANCH_DATA = [
     phone: "014 592 0334",
     website: "www.avuramotors.co.za",
     fontIndex: 0,
-    templateIndex: 0,
     logo: null,
     logoScale: 1,
     logoSpacing: 0
@@ -22,7 +20,6 @@ const BRANCH_DATA = [
     phone: "",
     website: "",
     fontIndex: 0,
-    templateIndex: 0,
     logo: null,
     logoScale: 1,
     logoSpacing: 0
@@ -33,7 +30,6 @@ const BRANCH_DATA = [
     phone: "",
     website: "",
     fontIndex: 0,
-    templateIndex: 0,
     logo: null,
     logoScale: 1,
     logoSpacing: 0
@@ -44,7 +40,6 @@ const BRANCH_DATA = [
     phone: "",
     website: "",
     fontIndex: 0,
-    templateIndex: 0,
     logo: null,
     logoScale: 1,
     logoSpacing: 0
@@ -55,7 +50,6 @@ const BRANCH_DATA = [
     phone: "",
     website: "",
     fontIndex: 0,
-    templateIndex: 0,
     logo: null,
     logoScale: 1,
     logoSpacing: 0
