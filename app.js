@@ -143,7 +143,11 @@ function applyBranchLogo(index) {
   if (logo) {
     headerImg.src = logo;
     headerImg.hidden = false;
-    headerImg.style.maxHeight = `${LOGO_BASE_HEIGHT * scale}px`;
+    // Must be an explicit height, not max-height: max-* properties only ever
+    // shrink an image down to fit, they never force it to grow past its
+    // natural pixel size -- which is exactly why the slider looked broken
+    // for a logo whose natural size was already below the "scaled" target.
+    headerImg.style.height = `${LOGO_BASE_HEIGHT * scale}px`;
     // max-width must scale with the slider too, not stay fixed -- otherwise
     // a wide/horizontal logo hits the width cap almost immediately and the
     // slider looks like it does nothing past that point.

@@ -235,7 +235,7 @@ body {
   letter-spacing: 6px;
   margin-top: -4px;
 }
-.p-logo-img { max-height: 70px; max-width: 80%; object-fit: contain; }
+.p-logo-img { height: 70px; max-width: 80%; object-fit: contain; }
 .logo-main[hidden], .logo-sub[hidden] { display: none; }
 
 /* hero */
