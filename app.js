@@ -92,6 +92,16 @@ function applyBranch(index) {
   $("dealer-address-input").value = branch.address;
   $("dealer-phone-input").value = branch.phone;
   $("dealer-web-input").value = branch.website;
+  applyBranchFont(index);
+}
+
+// Each branch remembers its own font choice; switching branches swaps the
+// flyer's font to match instead of leaving whatever was last picked.
+function applyBranchFont(index) {
+  const branch = BRANCH_DATA[index];
+  const fontIndex = (branch && branch.fontIndex) || 0;
+  $("pamphlet").style.fontFamily = FONT_LIBRARY[fontIndex].stack;
+  $("font-select").value = fontIndex;
 }
 
 // The "Rename current branch" entry is folded into the dropdown itself
@@ -496,7 +506,9 @@ $("export-btn").addEventListener("click", () => {
 // ---------- Font picker ----------
 // Applying font-family to the .pamphlet root cascades to every text element
 // inside it (nothing under it sets its own font-family), so one selector
-// controls all flyer text at once.
+// controls all flyer text at once. The choice is saved onto the currently
+// selected branch (BRANCH_DATA[currentBranchIndex].fontIndex), not applied
+// globally, so switching branches doesn't carry one branch's font over.
 const fontSelect = $("font-select");
 FONT_LIBRARY.forEach((font, i) => {
   const opt = document.createElement("option");
@@ -505,7 +517,9 @@ FONT_LIBRARY.forEach((font, i) => {
   fontSelect.appendChild(opt);
 });
 fontSelect.addEventListener("change", () => {
-  $("pamphlet").style.fontFamily = FONT_LIBRARY[Number(fontSelect.value)].stack;
+  const fontIndex = Number(fontSelect.value);
+  BRANCH_DATA[currentBranchIndex].fontIndex = fontIndex;
+  $("pamphlet").style.fontFamily = FONT_LIBRARY[fontIndex].stack;
 });
 
 // ---------- Settings modal ----------
