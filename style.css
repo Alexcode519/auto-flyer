@@ -118,6 +118,7 @@ body {
   font-size: 13px;
   width: 100%;
 }
+.checklist-item-group { display: flex; flex-direction: column; gap: 4px; }
 .feature-fields .row-2 { gap: 6px; }
 
 .feature-field-group {
@@ -134,27 +135,21 @@ body {
   width: 100%;
 }
 
-.field-with-font { display: flex; align-items: center; gap: 6px; }
-.field-with-font input,
-.field-with-font textarea { flex: 1; min-width: 0; width: auto; }
+/* Font selects always sit on their own row underneath the text field they
+   style (matching the icon-select-above-inputs pattern used elsewhere),
+   never squeezed side by side with it. */
 .line-font-select {
-  flex-shrink: 0;
-  width: 92px;
-  padding: 6px 4px;
+  width: 100%;
+  margin-top: 4px;
+  padding: 6px 8px;
   border: 1px solid #ccc;
   border-radius: 6px;
-  font-size: 10px;
+  font-size: 11px;
   background: #fff;
   color: #555;
 }
-/* .field select's width:100% (higher specificity than a bare .line-font-select)
-   was winning and forcing the dropdown to claim the whole row, squeezing its
-   paired text input down to a sliver -- these two rules re-assert the
-   intended sizing with enough specificity to actually stick. */
-.field-with-font .line-font-select,
-.checklist-fields .line-font-select { width: 92px; flex-shrink: 0; }
 .line-font-row { margin-top: 4px; gap: 6px; }
-.line-font-row .line-font-select { width: 100%; }
+.line-font-row .line-font-select { margin-top: 0; }
 
 .hint {
   font-size: 12px;
