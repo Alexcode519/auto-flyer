@@ -1,18 +1,18 @@
 // Dealership branches. First entry is the real, confirmed branch; the rest
 // are placeholders to be filled in with real details per-branch.
-// fontIndex refers to FONT_LIBRARY (see fontData.js), backgroundIndex to
-// BACKGROUND_LIBRARY (see backgroundData.js) -- each branch remembers its
-// own font, background, and logo (a data URL, or null to use the text
+// fontRef is either a FONT_LIBRARY array index as a string ("0", "1", ...)
+// or a saved custom font's id ("custom-<timestamp>") -- see fontData.js and
+// the CUSTOM_FONTS list (persisted to localStorage) in app.js. backgroundIndex
+// refers to BACKGROUND_LIBRARY (see backgroundData.js). Each branch remembers
+// its own font, background, and logo (a data URL, or null to use the text
 // logo), since different branches may want a different flyer style.
-// customFont, when set ({ name, dataUrl }), overrides fontIndex entirely.
 const BRANCH_DATA = [
   {
     name: "AVURA Executive Auto",
     address: "36 Kock Street, Rustenburg, 0299",
     phone: "014 592 0334",
     website: "www.avuramotors.co.za",
-    fontIndex: 0,
-    customFont: null,
+    fontRef: "0",
     backgroundIndex: 0,
     logo: null,
     logoScale: 1,
@@ -23,8 +23,7 @@ const BRANCH_DATA = [
     address: "",
     phone: "",
     website: "",
-    fontIndex: 0,
-    customFont: null,
+    fontRef: "0",
     backgroundIndex: 0,
     logo: null,
     logoScale: 1,
@@ -35,8 +34,7 @@ const BRANCH_DATA = [
     address: "",
     phone: "",
     website: "",
-    fontIndex: 0,
-    customFont: null,
+    fontRef: "0",
     backgroundIndex: 0,
     logo: null,
     logoScale: 1,
@@ -47,8 +45,7 @@ const BRANCH_DATA = [
     address: "",
     phone: "",
     website: "",
-    fontIndex: 0,
-    customFont: null,
+    fontRef: "0",
     backgroundIndex: 0,
     logo: null,
     logoScale: 1,
@@ -59,8 +56,7 @@ const BRANCH_DATA = [
     address: "",
     phone: "",
     website: "",
-    fontIndex: 0,
-    customFont: null,
+    fontRef: "0",
     backgroundIndex: 0,
     logo: null,
     logoScale: 1,

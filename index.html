@@ -273,9 +273,12 @@
       <div class="logo-upload-row font-upload-row">
         <input type="file" accept=".ttf,.otf,.woff,.woff2" id="upload-font" hidden />
         <label for="upload-font" class="crop-secondary-btn logo-upload-btn">Upload custom font</label>
-        <button type="button" id="font-remove-btn" class="crop-secondary-btn" hidden>Use dropdown font</button>
       </div>
-      <p class="hint" id="custom-font-hint" hidden>Using custom font: <b id="custom-font-name"></b></p>
+      <div id="font-save-row" class="font-save-row" hidden>
+        <input type="text" id="font-name-input" placeholder="Font name" />
+        <button type="button" id="font-save-btn" class="export-btn">Save to list</button>
+      </div>
+      <p class="hint" id="font-preview-hint" hidden>Previewing <b id="font-preview-name"></b> &mdash; save it to keep using it, or pick another font to discard it.</p>
       <p class="hint">Applies to all text on the flyer. Accepts .ttf, .otf, .woff, .woff2.</p>
     </div>
 

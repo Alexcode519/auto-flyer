@@ -641,6 +641,18 @@ body {
   gap: 12px;
 }
 .font-upload-row { margin-top: 10px; }
+.font-save-row { display: flex; gap: 8px; margin-top: 10px; }
+.font-save-row[hidden] { display: none; }
+.font-save-row input[type="text"] {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #555;
+  border-radius: 6px;
+  background: var(--bg-darker);
+  color: var(--text-light);
+  font-size: 13px;
+}
+.font-save-row .export-btn { width: auto; padding: 8px 14px; font-size: 13px; }
 .logo-preview {
   width: 64px;
   height: 64px;

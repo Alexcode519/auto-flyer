@@ -97,42 +97,52 @@ function applyBranch(index) {
   applyBranchLogo(index);
 }
 
+// Custom fonts a user has saved to the list, persisted across reloads.
+// Each entry is { id, label, dataUrl, family } -- family is a unique
+// CSS font-family name per saved font (several can coexist in the list).
+const CUSTOM_FONTS_KEY = "autoflyer-custom-fonts";
+let CUSTOM_FONTS = [];
+try {
+  CUSTOM_FONTS = JSON.parse(localStorage.getItem(CUSTOM_FONTS_KEY) || "[]");
+} catch (e) {
+  CUSTOM_FONTS = [];
+}
+function saveCustomFontsToStorage() {
+  try {
+    localStorage.setItem(CUSTOM_FONTS_KEY, JSON.stringify(CUSTOM_FONTS));
+  } catch (e) {
+    alert("Couldn't save this font permanently (storage full), but it'll keep working for this session.");
+  }
+}
+const loadedCustomFontFamilies = new Set(); // avoid re-registering the same font with the FontFace API repeatedly
+function ensureCustomFontLoaded(entry) {
+  if (loadedCustomFontFamilies.has(entry.family)) return Promise.resolve();
+  const face = new FontFace(entry.family, `url(${entry.dataUrl})`);
+  return face.load().then((loaded) => {
+    document.fonts.add(loaded);
+    loadedCustomFontFamilies.add(entry.family);
+  });
+}
+
 // Each branch remembers its own font choice; switching branches swaps the
 // flyer's font to match instead of leaving whatever was last picked.
-// A branch's customFont (an uploaded .ttf/.otf/.woff file), if set,
-// overrides the FONT_LIBRARY dropdown entirely.
-const CUSTOM_FONT_FAMILY = "AutoFlyerCustomFont";
-const loadedCustomFontUrls = new Set(); // avoid re-registering the same font with the FontFace API repeatedly
-
+// fontRef is either a FONT_LIBRARY index (as a string) or a saved custom
+// font's id -- see the fontRef comment in branchData.js.
 function applyBranchFont(index) {
+  discardPendingFontPreview();
   const branch = BRANCH_DATA[index];
-  const customFont = branch && branch.customFont;
+  const fontRef = (branch && branch.fontRef) || "0";
+  const custom = CUSTOM_FONTS.find((f) => f.id === fontRef);
 
-  if (customFont) {
-    $("font-select").disabled = true;
-    $("font-remove-btn").hidden = false;
-    $("custom-font-hint").hidden = false;
-    $("custom-font-name").textContent = customFont.name;
-    const applyFamily = () => { $("pamphlet").style.fontFamily = `"${CUSTOM_FONT_FAMILY}", Arial, sans-serif`; };
-    if (loadedCustomFontUrls.has(customFont.dataUrl)) {
-      applyFamily();
-    } else {
-      const face = new FontFace(CUSTOM_FONT_FAMILY, `url(${customFont.dataUrl})`);
-      face.load().then((loaded) => {
-        document.fonts.add(loaded);
-        loadedCustomFontUrls.add(customFont.dataUrl);
-        applyFamily();
-      });
-    }
-    return;
+  if (custom) {
+    ensureCustomFontLoaded(custom).then(() => {
+      $("pamphlet").style.fontFamily = `"${custom.family}", Arial, sans-serif`;
+    });
+  } else {
+    const fontIndex = Number(fontRef) || 0;
+    $("pamphlet").style.fontFamily = FONT_LIBRARY[fontIndex].stack;
   }
-
-  $("font-select").disabled = false;
-  $("font-remove-btn").hidden = true;
-  $("custom-font-hint").hidden = true;
-  const fontIndex = (branch && branch.fontIndex) || 0;
-  $("pamphlet").style.fontFamily = FONT_LIBRARY[fontIndex].stack;
-  $("font-select").value = fontIndex;
+  $("font-select").value = fontRef;
 }
 
 // Same per-branch pattern as font: background is set directly on #pamphlet
@@ -616,35 +626,83 @@ $("export-btn").addEventListener("click", () => {
 // Applying font-family to the .pamphlet root cascades to every text element
 // inside it (nothing under it sets its own font-family), so one selector
 // controls all flyer text at once. The choice is saved onto the currently
-// selected branch (BRANCH_DATA[currentBranchIndex].fontIndex), not applied
+// selected branch (BRANCH_DATA[currentBranchIndex].fontRef), not applied
 // globally, so switching branches doesn't carry one branch's font over.
 const fontSelect = $("font-select");
+const customFontOptgroup = document.createElement("optgroup");
+customFontOptgroup.label = "My Fonts";
+
 FONT_LIBRARY.forEach((font, i) => {
   const opt = document.createElement("option");
   opt.value = i;
   opt.textContent = font.label;
   fontSelect.appendChild(opt);
 });
+fontSelect.appendChild(customFontOptgroup);
+
+function addCustomFontOption(entry) {
+  const opt = document.createElement("option");
+  opt.value = entry.id;
+  opt.textContent = entry.label;
+  customFontOptgroup.appendChild(opt);
+}
+CUSTOM_FONTS.forEach(addCustomFontOption);
+
 fontSelect.addEventListener("change", () => {
-  const fontIndex = Number(fontSelect.value);
-  BRANCH_DATA[currentBranchIndex].fontIndex = fontIndex;
-  $("pamphlet").style.fontFamily = FONT_LIBRARY[fontIndex].stack;
+  discardPendingFontPreview();
+  BRANCH_DATA[currentBranchIndex].fontRef = fontSelect.value;
+  applyBranchFont(currentBranchIndex);
 });
+
+// Uploading only previews a font live (never touches BRANCH_DATA or
+// localStorage) until "Save to list" is clicked -- that's the point where it
+// becomes a real, reusable, persisted option in the dropdown.
+let pendingCustomFont = null; // { name, dataUrl }
+
+function discardPendingFontPreview() {
+  pendingCustomFont = null;
+  $("font-save-row").hidden = true;
+  $("font-preview-hint").hidden = true;
+  $("upload-font").value = "";
+}
 
 $("upload-font").addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (ev) => {
-    BRANCH_DATA[currentBranchIndex].customFont = { name: file.name, dataUrl: ev.target.result };
-    applyBranchFont(currentBranchIndex);
+    const name = file.name.replace(/\.[^.]+$/, "");
+    pendingCustomFont = { name, dataUrl: ev.target.result };
+    $("font-name-input").value = name;
+    $("font-save-row").hidden = false;
+    $("font-preview-hint").hidden = false;
+    $("font-preview-name").textContent = name;
+
+    const previewFace = new FontFace("AutoFlyerFontPreview", `url(${pendingCustomFont.dataUrl})`);
+    previewFace.load().then((loaded) => {
+      document.fonts.add(loaded);
+      $("pamphlet").style.fontFamily = `"AutoFlyerFontPreview", Arial, sans-serif`;
+    });
   };
   reader.readAsDataURL(file);
 });
 
-$("font-remove-btn").addEventListener("click", () => {
-  BRANCH_DATA[currentBranchIndex].customFont = null;
+$("font-save-btn").addEventListener("click", () => {
+  if (!pendingCustomFont) return;
+  const label = $("font-name-input").value.trim() || pendingCustomFont.name;
+  const id = `custom-${Date.now()}`;
+  const entry = { id, label, dataUrl: pendingCustomFont.dataUrl, family: `AutoFlyerFont-${id}` };
+
+  CUSTOM_FONTS.push(entry);
+  saveCustomFontsToStorage();
+  addCustomFontOption(entry);
+
+  pendingCustomFont = null;
+  $("font-save-row").hidden = true;
+  $("font-preview-hint").hidden = true;
   $("upload-font").value = "";
+
+  BRANCH_DATA[currentBranchIndex].fontRef = id;
   applyBranchFont(currentBranchIndex);
 });
 
