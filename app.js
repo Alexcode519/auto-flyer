@@ -793,6 +793,15 @@ function applyLayout(index) {
 // markup, since #pamphlet.innerHTML replacement destroys and recreates every
 // element inside it (branch-driven font/colour/logo, feature icons, all text
 // fields, and each photo's upload + crop position).
+// The feature-highlights strip can be hidden entirely (checkbox in the
+// sidebar), independent of which layout is active -- .p-features exists in
+// all 4 layouts under the same class, so one selector covers every case.
+function applyFeaturesVisibility() {
+  const section = document.querySelector(".p-features");
+  if (section) section.hidden = $("features-hide-toggle").checked;
+}
+$("features-hide-toggle").addEventListener("change", applyFeaturesVisibility);
+
 function rehydratePamphlet() {
   applyBranchFont(currentBranchIndex);
   applyBranchBackground(currentBranchIndex);
@@ -806,6 +815,7 @@ function rehydratePamphlet() {
 
   syncPreview();
   applyAllLineFonts();
+  applyFeaturesVisibility();
 
   Object.keys(SLOT_TO_PREVIEW).forEach((slot) => {
     const target = SLOT_TO_PREVIEW[slot];
@@ -944,7 +954,8 @@ function collectDraftState() {
         sub: document.querySelector(`[data-feature-sub="${i}"]`).value,
         icon: document.querySelector(`.icon-select[data-feature-icon="${i}"]`).value
       })),
-      checklist: [0, 1, 2, 3].map((i) => document.querySelector(`[data-check="${i}"]`).value)
+      checklist: [0, 1, 2, 3].map((i) => document.querySelector(`[data-check="${i}"]`).value),
+      featuresHidden: $("features-hide-toggle").checked
     },
     lineFonts: Object.fromEntries(
       [...document.querySelectorAll(".line-font-select")].map((s) => [s.dataset.line, s.value])
@@ -1055,6 +1066,7 @@ function restoreDraft() {
       const el = document.querySelector(`[data-check="${i}"]`);
       if (el) el.value = text;
     });
+    $("features-hide-toggle").checked = !!draft.copy.featuresHidden;
   }
 
   if (draft.lineFonts) {

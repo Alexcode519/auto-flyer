@@ -103,6 +103,26 @@ body {
   margin: 14px 0 6px;
 }
 
+.subheading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 14px 0 6px;
+}
+.subheading-row .subheading { margin: 0; }
+.section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: #777;
+  cursor: pointer;
+}
+.section-toggle input { margin: 0; }
+
 .checklist-fields,
 .feature-fields {
   display: flex;
@@ -360,6 +380,7 @@ body {
   padding: 18px 10px;
   margin-top: 16px;
 }
+.p-features[hidden] { display: none; }
 .feature {
   display: flex;
   flex-direction: column;
