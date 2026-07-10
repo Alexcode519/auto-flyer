@@ -470,6 +470,47 @@ cropZoomSlider.addEventListener("input", () => setZoom(Number(cropZoomSlider.val
 $("crop-zoom-in").addEventListener("click", () => setZoom(Number(cropZoomSlider.value) + 0.2));
 $("crop-zoom-out").addEventListener("click", () => setZoom(Number(cropZoomSlider.value) - 0.2));
 
+// Shared by the upload handler and by draft restore-on-load: pushes a data
+// URL into a slot's sidebar thumbnail, pamphlet element, and crop state.
+// resetCrop is false when restoring a saved draft (the saved crop position
+// should be kept, not reset to centered), and detectColor is only relevant
+// for a genuinely new upload, never for a restore (the colour was already
+// chosen, possibly by hand, last session).
+function loadImageIntoSlot(slot, dataUrl, { detectColor = false, resetCrop = true } = {}) {
+  state.images[slot] = dataUrl;
+
+  const slotEl = $(`upload-${slot}`).closest(".photo-slot");
+  const placeholder = slotEl.querySelector(".slot-placeholder");
+  const preview = slotEl.querySelector(".slot-preview");
+  preview.src = dataUrl;
+  preview.hidden = false;
+  placeholder.hidden = true;
+
+  const target = SLOT_TO_PREVIEW[slot];
+  const pImg = $(target.img);
+  pImg.style.backgroundImage = `url("${dataUrl}")`;
+  pImg.hidden = false;
+  if (target.empty) $(target.empty).hidden = true;
+
+  if (resetCrop) imagePosition[slot] = { x: 50, y: 50, scale: 1 };
+
+  const tmpImg = new Image();
+  tmpImg.onload = () => {
+    naturalSize[slot] = { w: tmpImg.naturalWidth, h: tmpImg.naturalHeight };
+    applyImagePosition(slot);
+    if (detectColor && slot === "hero") {
+      detectColorFromImage(tmpImg, (colorName) => {
+        $("color-select").value = colorName;
+        syncPreview();
+      });
+    }
+  };
+  tmpImg.src = dataUrl;
+
+  const cropBtn = document.querySelector(`.crop-btn[data-target="${slot}"]`);
+  if (cropBtn) cropBtn.hidden = false;
+}
+
 Object.keys(SLOT_TO_PREVIEW).forEach((slot) => {
   const input = $(`upload-${slot}`);
   input.addEventListener("change", () => {
@@ -477,42 +518,8 @@ Object.keys(SLOT_TO_PREVIEW).forEach((slot) => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (e) => {
-      const dataUrl = e.target.result;
-      state.images[slot] = dataUrl;
-
-      // update form thumbnail
-      const slotEl = input.closest(".photo-slot");
-      const placeholder = slotEl.querySelector(".slot-placeholder");
-      const preview = slotEl.querySelector(".slot-preview");
-      preview.src = dataUrl;
-      preview.hidden = false;
-      placeholder.hidden = true;
-
-      // update pamphlet preview
-      const target = SLOT_TO_PREVIEW[slot];
-      const pImg = $(target.img);
-      pImg.style.backgroundImage = `url("${dataUrl}")`;
-      pImg.hidden = false;
-      if (target.empty) $(target.empty).hidden = true;
-
-      // reset this slot's crop state, then measure the real photo dimensions
-      // (needed to compute cover-fit + zoom sizing) before positioning it
-      imagePosition[slot] = { x: 50, y: 50, scale: 1 };
-      const tmpImg = new Image();
-      tmpImg.onload = () => {
-        naturalSize[slot] = { w: tmpImg.naturalWidth, h: tmpImg.naturalHeight };
-        applyImagePosition(slot);
-        if (slot === "hero") {
-          detectColorFromImage(tmpImg, (colorName) => {
-            $("color-select").value = colorName;
-            syncPreview();
-          });
-        }
-      };
-      tmpImg.src = dataUrl;
-
-      const cropBtn = document.querySelector(`.crop-btn[data-target="${slot}"]`);
-      if (cropBtn) cropBtn.hidden = false;
+      loadImageIntoSlot(slot, e.target.result, { detectColor: true, resetCrop: true });
+      saveDraft();
     };
     reader.readAsDataURL(file);
   });
@@ -895,11 +902,227 @@ settingsModal.addEventListener("click", (e) => {
   }
 })();
 
+// ---------- Save / restore draft (localStorage) ----------
+// Persists the *entire* flyer -- branding, vehicle info, copy, per-line
+// fonts, and photos -- so reloading picks up exactly where you left off
+// instead of resetting to the seed data every time. Auto-saves (debounced)
+// on any input/change/click anywhere in the form; explicitly re-saved after
+// a photo finishes loading too, since FileReader is async and the delegated
+// listener would otherwise fire before the data URL is ready.
+const DRAFT_KEY = "autoflyer-draft";
+let draftSaveTimer = null;
+let draftStorageWarned = false;
+
+function collectDraftState() {
+  return {
+    version: 1,
+    currentBranchIndex,
+    currentLayoutIndex,
+    branchData: BRANCH_DATA,
+    vehicle: {
+      brand: state.brand,
+      model: state.model,
+      variant: state.variant,
+      brandInputValue: brandInput.value,
+      modelSelectValue: modelSelect.value,
+      modelCustomValue: modelCustom.value,
+      modelCustomHidden: modelCustom.hidden,
+      variantSelectValue: variantSelect.value,
+      variantCustomValue: variantCustom.value,
+      variantCustomHidden: variantCustom.hidden,
+      color: $("color-select").value,
+      year: $("year-input").value,
+      km: $("km-input").value,
+      price: $("price-input").value
+    },
+    copy: {
+      tagline1: $("tagline1-input").value,
+      tagline2: $("tagline2-input").value,
+      description: $("description-input").value,
+      features: [0, 1, 2, 3].map((i) => ({
+        title: document.querySelector(`[data-feature-title="${i}"]`).value,
+        sub: document.querySelector(`[data-feature-sub="${i}"]`).value,
+        icon: document.querySelector(`.icon-select[data-feature-icon="${i}"]`).value
+      })),
+      checklist: [0, 1, 2, 3].map((i) => document.querySelector(`[data-check="${i}"]`).value)
+    },
+    lineFonts: Object.fromEntries(
+      [...document.querySelectorAll(".line-font-select")].map((s) => [s.dataset.line, s.value])
+    ),
+    dealerInfo: {
+      name: $("dealer-name-input").value,
+      address: $("dealer-address-input").value,
+      phone: $("dealer-phone-input").value,
+      website: $("dealer-web-input").value
+    },
+    images: state.images,
+    imagePosition,
+    naturalSize
+  };
+}
+
+function saveDraft() {
+  clearTimeout(draftSaveTimer);
+  draftSaveTimer = setTimeout(() => {
+    const data = collectDraftState();
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+    } catch (e) {
+      // Photos are almost always the reason this hits the quota -- retry
+      // without them so everything else still round-trips.
+      try {
+        const { images, ...withoutImages } = data;
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(withoutImages));
+        if (!draftStorageWarned) {
+          draftStorageWarned = true;
+          alert("Your photos are too large to save automatically, so they won't be restored next time -- everything else (branding, text, layout) will be. Consider using smaller images.");
+        }
+      } catch (e2) {
+        // Storage unavailable entirely (private browsing, etc.) -- nothing more to do.
+      }
+    }
+  }, 600);
+}
+
+function restoreVehicleSelection(v) {
+  if (!v) return;
+  brandInput.value = v.brandInputValue || "";
+  state.brand = v.brand || "";
+  if (v.brand && VEHICLE_DATA[v.brand]) {
+    populateModels(v.brand);
+    if (v.modelCustomHidden === false) {
+      modelSelect.value = "__other__";
+      modelCustom.hidden = false;
+      modelCustom.value = v.modelCustomValue || "";
+      state.model = v.model || "";
+    } else if (v.modelSelectValue) {
+      modelSelect.value = v.modelSelectValue;
+      state.model = v.model || "";
+      populateVariants(v.brand, v.model);
+      if (v.variantCustomHidden === false) {
+        variantSelect.value = "__other__";
+        variantCustom.hidden = false;
+        variantCustom.value = v.variantCustomValue || "";
+        state.variant = v.variant || "";
+      } else if (v.variantSelectValue) {
+        variantSelect.value = v.variantSelectValue;
+        state.variant = v.variant || "";
+      }
+    }
+  }
+  $("color-select").value = v.color || "Beige";
+  $("year-input").value = v.year || "2021";
+  $("km-input").value = v.km || "";
+  $("price-input").value = v.price || "";
+}
+
+// Returns true if a saved draft was found and applied.
+function restoreDraft() {
+  let draft;
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return false;
+    draft = JSON.parse(raw);
+  } catch (e) {
+    return false;
+  }
+  if (!draft) return false;
+
+  if (Array.isArray(draft.branchData)) {
+    draft.branchData.forEach((saved, i) => {
+      if (BRANCH_DATA[i]) Object.assign(BRANCH_DATA[i], saved);
+    });
+  }
+  currentBranchIndex = draft.currentBranchIndex || 0;
+  branchSelect.value = String(currentBranchIndex);
+  currentLayoutIndex = draft.currentLayoutIndex || 0;
+
+  restoreVehicleSelection(draft.vehicle);
+
+  if (draft.copy) {
+    $("tagline1-input").value = draft.copy.tagline1 ?? $("tagline1-input").value;
+    $("tagline2-input").value = draft.copy.tagline2 ?? $("tagline2-input").value;
+    $("description-input").value = draft.copy.description ?? $("description-input").value;
+    (draft.copy.features || []).forEach((f, i) => {
+      const titleEl = document.querySelector(`[data-feature-title="${i}"]`);
+      const subEl = document.querySelector(`[data-feature-sub="${i}"]`);
+      const iconEl = document.querySelector(`.icon-select[data-feature-icon="${i}"]`);
+      if (titleEl) titleEl.value = f.title;
+      if (subEl) subEl.value = f.sub;
+      if (iconEl) iconEl.value = f.icon;
+    });
+    (draft.copy.checklist || []).forEach((text, i) => {
+      const el = document.querySelector(`[data-check="${i}"]`);
+      if (el) el.value = text;
+    });
+  }
+
+  if (draft.lineFonts) {
+    Object.keys(draft.lineFonts).forEach((lineId) => {
+      const sel = document.querySelector(`.line-font-select[data-line="${lineId}"]`);
+      if (sel) sel.value = draft.lineFonts[lineId];
+    });
+  }
+
+  if (draft.dealerInfo) {
+    $("dealer-name-input").value = draft.dealerInfo.name ?? $("dealer-name-input").value;
+    $("dealer-address-input").value = draft.dealerInfo.address ?? $("dealer-address-input").value;
+    $("dealer-phone-input").value = draft.dealerInfo.phone ?? $("dealer-phone-input").value;
+    $("dealer-web-input").value = draft.dealerInfo.website ?? $("dealer-web-input").value;
+  }
+
+  if (draft.naturalSize) Object.assign(naturalSize, draft.naturalSize);
+  if (draft.imagePosition) {
+    Object.keys(imagePosition).forEach((slot) => {
+      if (draft.imagePosition[slot]) imagePosition[slot] = draft.imagePosition[slot];
+    });
+  }
+  if (draft.images) {
+    Object.keys(draft.images).forEach((slot) => {
+      if (!draft.images[slot]) return;
+      const dataUrl = draft.images[slot];
+      state.images[slot] = dataUrl;
+      // Only the sidebar thumbnail here -- #pamphlet is still empty at this
+      // point (applyLayout() hasn't run yet), so its photo elements don't
+      // exist to update. applyLayout()'s rehydratePamphlet() call right
+      // after this function returns handles the pamphlet side, reading the
+      // state.images/imagePosition/naturalSize already restored above.
+      const slotEl = $(`upload-${slot}`).closest(".photo-slot");
+      const placeholder = slotEl.querySelector(".slot-placeholder");
+      const preview = slotEl.querySelector(".slot-preview");
+      preview.src = dataUrl;
+      preview.hidden = false;
+      placeholder.hidden = true;
+      // (.crop-btn itself lives inside #pamphlet, which is still empty here
+      // -- rehydratePamphlet() reveals it once the layout markup exists.)
+    });
+  }
+
+  return true;
+}
+
+$("clear-draft-btn").addEventListener("click", () => {
+  if (!confirm("Clear the saved draft? This reloads the page back to the default AVURA starting point.")) return;
+  localStorage.removeItem(DRAFT_KEY);
+  location.reload();
+});
+
+// Broad delegation catches virtually every interaction (typing, dropdowns,
+// checkboxes, buttons) without needing a saveDraft() call wired into each
+// individual handler; the 600ms debounce keeps this cheap even on rapid typing.
+document.addEventListener("input", saveDraft);
+document.addEventListener("change", saveDraft);
+document.addEventListener("click", (e) => {
+  if (e.target.closest("button")) saveDraft();
+});
+
 // initial defaults
 $("year-input").value = "2021";
-// applyLayout populates #pamphlet (which starts empty in index.html) and
-// rehydrates it -- this covers font/colour/logo application and syncPreview,
-// so a separate applyBranch(0)/syncPreview() call isn't needed here (the
-// sidebar's dealer-name/address/phone/web inputs already carry branch 0's
-// values as their HTML defaults).
-applyLayout(0);
+restoreDraft();
+// applyLayout populates #pamphlet (which starts empty in index.html), sets
+// the active layout-swatch, and rehydrates it -- this covers font/colour/
+// logo application and syncPreview, so a separate applyBranch(0)/
+// syncPreview() call isn't needed here when there's no draft (the sidebar's
+// dealer-name/address/phone/web inputs already carry branch 0's values as
+// their HTML defaults).
+applyLayout(currentLayoutIndex);
