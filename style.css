@@ -400,7 +400,10 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 4px;
-  margin-top: 4px;
+  /* margin (not padding) so the gap reveals the pamphlet's own background
+     behind it, rather than .p-gallery's own black fill showing through as
+     solid bars on the sides. */
+  margin: 14px 24px 0;
   background: #000;
 }
 .gallery-cell {
