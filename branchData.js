@@ -4,6 +4,7 @@
 // BACKGROUND_LIBRARY (see backgroundData.js) -- each branch remembers its
 // own font, background, and logo (a data URL, or null to use the text
 // logo), since different branches may want a different flyer style.
+// customFont, when set ({ name, dataUrl }), overrides fontIndex entirely.
 const BRANCH_DATA = [
   {
     name: "AVURA Executive Auto",
@@ -11,6 +12,7 @@ const BRANCH_DATA = [
     phone: "014 592 0334",
     website: "www.avuramotors.co.za",
     fontIndex: 0,
+    customFont: null,
     backgroundIndex: 0,
     logo: null,
     logoScale: 1,
@@ -22,6 +24,7 @@ const BRANCH_DATA = [
     phone: "",
     website: "",
     fontIndex: 0,
+    customFont: null,
     backgroundIndex: 0,
     logo: null,
     logoScale: 1,
@@ -33,6 +36,7 @@ const BRANCH_DATA = [
     phone: "",
     website: "",
     fontIndex: 0,
+    customFont: null,
     backgroundIndex: 0,
     logo: null,
     logoScale: 1,
@@ -44,6 +48,7 @@ const BRANCH_DATA = [
     phone: "",
     website: "",
     fontIndex: 0,
+    customFont: null,
     backgroundIndex: 0,
     logo: null,
     logoScale: 1,
@@ -55,6 +60,7 @@ const BRANCH_DATA = [
     phone: "",
     website: "",
     fontIndex: 0,
+    customFont: null,
     backgroundIndex: 0,
     logo: null,
     logoScale: 1,

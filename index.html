@@ -270,7 +270,13 @@
     <div class="settings-group">
       <span class="subheading">Font</span>
       <select id="font-select"></select>
-      <p class="hint">Applies to all text on the flyer.</p>
+      <div class="logo-upload-row font-upload-row">
+        <input type="file" accept=".ttf,.otf,.woff,.woff2" id="upload-font" hidden />
+        <label for="upload-font" class="crop-secondary-btn logo-upload-btn">Upload custom font</label>
+        <button type="button" id="font-remove-btn" class="crop-secondary-btn" hidden>Use dropdown font</button>
+      </div>
+      <p class="hint" id="custom-font-hint" hidden>Using custom font: <b id="custom-font-name"></b></p>
+      <p class="hint">Applies to all text on the flyer. Accepts .ttf, .otf, .woff, .woff2.</p>
     </div>
 
     <div class="crop-modal-actions">

@@ -99,8 +99,37 @@ function applyBranch(index) {
 
 // Each branch remembers its own font choice; switching branches swaps the
 // flyer's font to match instead of leaving whatever was last picked.
+// A branch's customFont (an uploaded .ttf/.otf/.woff file), if set,
+// overrides the FONT_LIBRARY dropdown entirely.
+const CUSTOM_FONT_FAMILY = "AutoFlyerCustomFont";
+const loadedCustomFontUrls = new Set(); // avoid re-registering the same font with the FontFace API repeatedly
+
 function applyBranchFont(index) {
   const branch = BRANCH_DATA[index];
+  const customFont = branch && branch.customFont;
+
+  if (customFont) {
+    $("font-select").disabled = true;
+    $("font-remove-btn").hidden = false;
+    $("custom-font-hint").hidden = false;
+    $("custom-font-name").textContent = customFont.name;
+    const applyFamily = () => { $("pamphlet").style.fontFamily = `"${CUSTOM_FONT_FAMILY}", Arial, sans-serif`; };
+    if (loadedCustomFontUrls.has(customFont.dataUrl)) {
+      applyFamily();
+    } else {
+      const face = new FontFace(CUSTOM_FONT_FAMILY, `url(${customFont.dataUrl})`);
+      face.load().then((loaded) => {
+        document.fonts.add(loaded);
+        loadedCustomFontUrls.add(customFont.dataUrl);
+        applyFamily();
+      });
+    }
+    return;
+  }
+
+  $("font-select").disabled = false;
+  $("font-remove-btn").hidden = true;
+  $("custom-font-hint").hidden = true;
   const fontIndex = (branch && branch.fontIndex) || 0;
   $("pamphlet").style.fontFamily = FONT_LIBRARY[fontIndex].stack;
   $("font-select").value = fontIndex;
@@ -566,12 +595,14 @@ document.querySelectorAll(".icon-select").forEach((select) => {
 // ---------- Export to PNG ----------
 $("export-btn").addEventListener("click", () => {
   const node = $("pamphlet");
-  html2canvas(node, {
+  // document.fonts.ready matters most right after uploading a custom font --
+  // Google Fonts are already loaded well before anyone reaches Export.
+  document.fonts.ready.then(() => html2canvas(node, {
     scale: 2,
     backgroundColor: "#1c1c1e",
     useCORS: true,
     ignoreElements: (el) => el.classList.contains("crop-btn")
-  }).then((canvas) => {
+  })).then((canvas) => {
     const link = document.createElement("a");
     const brand = (state.brand || "vehicle").replace(/\s+/g, "-");
     const model = (state.model || "pamphlet").replace(/\s+/g, "-");
@@ -598,6 +629,23 @@ fontSelect.addEventListener("change", () => {
   const fontIndex = Number(fontSelect.value);
   BRANCH_DATA[currentBranchIndex].fontIndex = fontIndex;
   $("pamphlet").style.fontFamily = FONT_LIBRARY[fontIndex].stack;
+});
+
+$("upload-font").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    BRANCH_DATA[currentBranchIndex].customFont = { name: file.name, dataUrl: ev.target.result };
+    applyBranchFont(currentBranchIndex);
+  };
+  reader.readAsDataURL(file);
+});
+
+$("font-remove-btn").addEventListener("click", () => {
+  BRANCH_DATA[currentBranchIndex].customFont = null;
+  $("upload-font").value = "";
+  applyBranchFont(currentBranchIndex);
 });
 
 // ---------- Layout picker ----------

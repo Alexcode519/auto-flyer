@@ -640,6 +640,7 @@ body {
   align-items: center;
   gap: 12px;
 }
+.font-upload-row { margin-top: 10px; }
 .logo-preview {
   width: 64px;
   height: 64px;
