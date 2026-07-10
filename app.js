@@ -610,21 +610,45 @@ document.querySelectorAll(".icon-select").forEach((select) => {
 });
 
 // ---------- Export to PNG ----------
+// Output is always exactly 1080x1350 (Instagram-portrait 4:5), regardless of
+// how tall the flyer's actual content happens to be for a given layout/
+// branch/copy length. The captured flyer is scaled to fit entirely inside
+// that frame (never cropped, so no risk of losing the footer or badge) and
+// centered; any leftover top/bottom space is filled with the flyer's own
+// background colour so it reads as intentional padding, not a stray bar.
+const EXPORT_WIDTH = 1080;
+const EXPORT_HEIGHT = 1350;
+
 $("export-btn").addEventListener("click", () => {
   const node = $("pamphlet");
+  const bgColor = getComputedStyle(node).getPropertyValue("--bg-dark").trim() || "#1c1c1e";
   // document.fonts.ready matters most right after uploading a custom font --
   // Google Fonts are already loaded well before anyone reaches Export.
   document.fonts.ready.then(() => html2canvas(node, {
     scale: 2,
-    backgroundColor: "#1c1c1e",
+    backgroundColor: bgColor,
     useCORS: true,
     ignoreElements: (el) => el.classList.contains("crop-btn")
-  })).then((canvas) => {
+  })).then((sourceCanvas) => {
+    const output = document.createElement("canvas");
+    output.width = EXPORT_WIDTH;
+    output.height = EXPORT_HEIGHT;
+    const ctx = output.getContext("2d");
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, EXPORT_WIDTH, EXPORT_HEIGHT);
+
+    const fitScale = Math.min(EXPORT_WIDTH / sourceCanvas.width, EXPORT_HEIGHT / sourceCanvas.height);
+    const drawWidth = sourceCanvas.width * fitScale;
+    const drawHeight = sourceCanvas.height * fitScale;
+    const offsetX = (EXPORT_WIDTH - drawWidth) / 2;
+    const offsetY = (EXPORT_HEIGHT - drawHeight) / 2;
+    ctx.drawImage(sourceCanvas, offsetX, offsetY, drawWidth, drawHeight);
+
     const link = document.createElement("a");
     const brand = (state.brand || "vehicle").replace(/\s+/g, "-");
     const model = (state.model || "pamphlet").replace(/\s+/g, "-");
     link.download = `${brand}-${model}-pamphlet.png`;
-    link.href = canvas.toDataURL("image/png");
+    link.href = output.toDataURL("image/png");
     link.click();
   });
 });
