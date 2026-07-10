@@ -139,15 +139,24 @@
       <summary>4. Copy</summary>
       <label class="field">
         <span>Headline line 1</span>
-        <input type="text" id="tagline1-input" value="BUILT TO WORK." />
+        <div class="field-with-font">
+          <input type="text" id="tagline1-input" value="BUILT TO WORK." />
+          <select class="line-font-select" data-line="tagline1"></select>
+        </div>
       </label>
       <label class="field">
         <span>Headline line 2 (accent)</span>
-        <input type="text" id="tagline2-input" value="MADE TO LAST." />
+        <div class="field-with-font">
+          <input type="text" id="tagline2-input" value="MADE TO LAST." />
+          <select class="line-font-select" data-line="tagline2"></select>
+        </div>
       </label>
       <label class="field">
         <span>Description</span>
-        <textarea id="description-input" rows="2">Legendary reliability. Unmatched capability.</textarea>
+        <div class="field-with-font">
+          <textarea id="description-input" rows="2">Legendary reliability. Unmatched capability.</textarea>
+          <select class="line-font-select" data-line="description"></select>
+        </div>
       </label>
 
       <span class="subheading">Feature highlights</span>
@@ -158,12 +167,20 @@
             <input type="text" value="4.5L V8 TURBO DIESEL" data-feature-title="0" placeholder="Title" />
             <input type="text" value="Powerful. Proven." data-feature-sub="0" placeholder="Subtitle" />
           </div>
+          <div class="row-2 line-font-row">
+            <select class="line-font-select" data-line="feature-0-title"></select>
+            <select class="line-font-select" data-line="feature-0-sub"></select>
+          </div>
         </div>
         <div class="feature-field-group">
           <select class="icon-select" data-feature-icon="1"></select>
           <div class="row-2">
             <input type="text" value="4X4 CAPABILITY" data-feature-title="1" placeholder="Title" />
             <input type="text" value="Go anywhere." data-feature-sub="1" placeholder="Subtitle" />
+          </div>
+          <div class="row-2 line-font-row">
+            <select class="line-font-select" data-line="feature-1-title"></select>
+            <select class="line-font-select" data-line="feature-1-sub"></select>
           </div>
         </div>
         <div class="feature-field-group">
@@ -172,6 +189,10 @@
             <input type="text" value="TOYOTA RELIABILITY" data-feature-title="2" placeholder="Title" />
             <input type="text" value="Built to go the distance." data-feature-sub="2" placeholder="Subtitle" />
           </div>
+          <div class="row-2 line-font-row">
+            <select class="line-font-select" data-line="feature-2-title"></select>
+            <select class="line-font-select" data-line="feature-2-sub"></select>
+          </div>
         </div>
         <div class="feature-field-group">
           <select class="icon-select" data-feature-icon="3"></select>
@@ -179,15 +200,31 @@
             <input type="text" value="HEAVY DUTY PAYLOAD" data-feature-title="3" placeholder="Title" />
             <input type="text" value="Work smarter. Work harder." data-feature-sub="3" placeholder="Subtitle" />
           </div>
+          <div class="row-2 line-font-row">
+            <select class="line-font-select" data-line="feature-3-title"></select>
+            <select class="line-font-select" data-line="feature-3-sub"></select>
+          </div>
         </div>
       </div>
 
       <span class="subheading">Checklist</span>
       <div class="checklist-fields">
-        <input type="text" value="Full Service History" data-check="0" />
-        <input type="text" value="Well Maintained" data-check="1" />
-        <input type="text" value="Ready for Work or Adventure" data-check="2" />
-        <input type="text" value="Finance Available" data-check="3" />
+        <div class="field-with-font">
+          <input type="text" value="Full Service History" data-check="0" />
+          <select class="line-font-select" data-line="check-0"></select>
+        </div>
+        <div class="field-with-font">
+          <input type="text" value="Well Maintained" data-check="1" />
+          <select class="line-font-select" data-line="check-1"></select>
+        </div>
+        <div class="field-with-font">
+          <input type="text" value="Ready for Work or Adventure" data-check="2" />
+          <select class="line-font-select" data-line="check-2"></select>
+        </div>
+        <div class="field-with-font">
+          <input type="text" value="Finance Available" data-check="3" />
+          <select class="line-font-select" data-line="check-3"></select>
+        </div>
       </div>
     </details>
 

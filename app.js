@@ -624,29 +624,45 @@ $("export-btn").addEventListener("click", () => {
 
 // ---------- Font picker ----------
 // Applying font-family to the .pamphlet root cascades to every text element
-// inside it (nothing under it sets its own font-family), so one selector
-// controls all flyer text at once. The choice is saved onto the currently
-// selected branch (BRANCH_DATA[currentBranchIndex].fontRef), not applied
-// globally, so switching branches doesn't carry one branch's font over.
+// inside it, so the main Font dropdown sets a flyer-wide baseline. Individual
+// .line-font-select dropdowns (one per Copy field) can override that
+// baseline for just their own element via a direct inline style, which wins
+// on specificity. Every font-picking <select> on the page (the main one plus
+// all per-line ones) shares the same FONT_LIBRARY + CUSTOM_FONTS option list,
+// tracked in fontSelectOptgroups so a newly saved custom font shows up in
+// all of them at once, not just wherever it was uploaded from.
 const fontSelect = $("font-select");
-const customFontOptgroup = document.createElement("optgroup");
-customFontOptgroup.label = "My Fonts";
+const fontSelectOptgroups = [];
 
-FONT_LIBRARY.forEach((font, i) => {
-  const opt = document.createElement("option");
-  opt.value = i;
-  opt.textContent = font.label;
-  fontSelect.appendChild(opt);
-});
-fontSelect.appendChild(customFontOptgroup);
+function populateFontSelect(select, includeDefaultOption) {
+  if (includeDefaultOption) {
+    const defaultOpt = document.createElement("option");
+    defaultOpt.value = "";
+    defaultOpt.textContent = "Default";
+    select.appendChild(defaultOpt);
+  }
+  FONT_LIBRARY.forEach((font, i) => {
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = font.label;
+    select.appendChild(opt);
+  });
+  const optgroup = document.createElement("optgroup");
+  optgroup.label = "My Fonts";
+  CUSTOM_FONTS.forEach((entry) => addCustomFontOption(optgroup, entry));
+  select.appendChild(optgroup);
+  fontSelectOptgroups.push(optgroup);
+}
 
-function addCustomFontOption(entry) {
+function addCustomFontOption(optgroup, entry) {
   const opt = document.createElement("option");
   opt.value = entry.id;
   opt.textContent = entry.label;
-  customFontOptgroup.appendChild(opt);
+  optgroup.appendChild(opt);
 }
-CUSTOM_FONTS.forEach(addCustomFontOption);
+
+populateFontSelect(fontSelect, false);
+document.querySelectorAll(".line-font-select").forEach((select) => populateFontSelect(select, true));
 
 fontSelect.addEventListener("change", () => {
   discardPendingFontPreview();
@@ -695,7 +711,7 @@ $("font-save-btn").addEventListener("click", () => {
 
   CUSTOM_FONTS.push(entry);
   saveCustomFontsToStorage();
-  addCustomFontOption(entry);
+  fontSelectOptgroups.forEach((optgroup) => addCustomFontOption(optgroup, entry));
 
   pendingCustomFont = null;
   $("font-save-row").hidden = true;
@@ -704,6 +720,51 @@ $("font-save-btn").addEventListener("click", () => {
 
   BRANCH_DATA[currentBranchIndex].fontRef = id;
   applyBranchFont(currentBranchIndex);
+});
+
+// ---------- Per-line font overrides ----------
+// Maps each .line-font-select's data-line value to the pamphlet element it
+// should style. Unlike the main Font dropdown (per-branch, in BRANCH_DATA),
+// these live alongside the copy text itself in the sidebar inputs -- neither
+// is persisted, both are just re-read from the DOM on every sync, same as
+// the text content they sit next to.
+const LINE_FONT_TARGETS = {
+  tagline1: "p-tagline1",
+  tagline2: "p-tagline2",
+  description: "p-description",
+  "feature-0-title": "p-feature-0-title", "feature-0-sub": "p-feature-0-sub",
+  "feature-1-title": "p-feature-1-title", "feature-1-sub": "p-feature-1-sub",
+  "feature-2-title": "p-feature-2-title", "feature-2-sub": "p-feature-2-sub",
+  "feature-3-title": "p-feature-3-title", "feature-3-sub": "p-feature-3-sub",
+  "check-0": "p-check-0", "check-1": "p-check-1", "check-2": "p-check-2", "check-3": "p-check-3"
+};
+
+function applyLineFont(lineId) {
+  const select = document.querySelector(`.line-font-select[data-line="${lineId}"]`);
+  const targetEl = $(LINE_FONT_TARGETS[lineId]);
+  if (!select || !targetEl) return;
+
+  const ref = select.value;
+  if (!ref) {
+    targetEl.style.fontFamily = ""; // inherit the flyer-wide font
+    return;
+  }
+  const custom = CUSTOM_FONTS.find((f) => f.id === ref);
+  if (custom) {
+    ensureCustomFontLoaded(custom).then(() => {
+      targetEl.style.fontFamily = `"${custom.family}", Arial, sans-serif`;
+    });
+  } else {
+    targetEl.style.fontFamily = FONT_LIBRARY[Number(ref) || 0].stack;
+  }
+}
+
+function applyAllLineFonts() {
+  Object.keys(LINE_FONT_TARGETS).forEach(applyLineFont);
+}
+
+document.querySelectorAll(".line-font-select").forEach((select) => {
+  select.addEventListener("change", () => applyLineFont(select.dataset.line));
 });
 
 // ---------- Layout picker ----------
@@ -737,6 +798,7 @@ function rehydratePamphlet() {
   });
 
   syncPreview();
+  applyAllLineFonts();
 
   Object.keys(SLOT_TO_PREVIEW).forEach((slot) => {
     const target = SLOT_TO_PREVIEW[slot];
