@@ -136,7 +136,7 @@ body {
 
 .field-with-font { display: flex; align-items: center; gap: 6px; }
 .field-with-font input,
-.field-with-font textarea { flex: 1; min-width: 0; }
+.field-with-font textarea { flex: 1; min-width: 0; width: auto; }
 .line-font-select {
   flex-shrink: 0;
   width: 92px;
@@ -147,6 +147,12 @@ body {
   background: #fff;
   color: #555;
 }
+/* .field select's width:100% (higher specificity than a bare .line-font-select)
+   was winning and forcing the dropdown to claim the whole row, squeezing its
+   paired text input down to a sliver -- these two rules re-assert the
+   intended sizing with enough specificity to actually stick. */
+.field-with-font .line-font-select,
+.checklist-fields .line-font-select { width: 92px; flex-shrink: 0; }
 .line-font-row { margin-top: 4px; gap: 6px; }
 .line-font-row .line-font-select { width: 100%; }
 
