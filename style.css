@@ -400,6 +400,7 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 4px;
+  margin-top: 4px;
   background: #000;
 }
 .gallery-cell {
@@ -790,6 +791,7 @@ body {
 .p-split-photos {
   display: flex;
   flex-direction: column;
+  gap: 4px;
 }
 .p-hero-photo-split {
   height: 220px;
